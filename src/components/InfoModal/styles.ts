@@ -28,26 +28,26 @@ export const Modal = styled.div<ModalProps>`
   backdrop-filter: blur(4px);
   justify-content: center;
   align-items: flex-start;
-  padding-top: 5vh;
+  padding-top: 4vh;
 `;
 
 export const ModalContent = styled.div`
   background: linear-gradient(to bottom, #ffffff, #fff3e0);
-  padding: 30px;
-  width: 85%;
-  max-width: 900px;
-  border-radius: 15px;
+  padding: 24px;
+  width: 82%;
+  max-width: 780px;
+  border-radius: 12px;
   text-align: left;
   display: flex;
   flex-direction: column;
-  max-height: 80vh;
+  max-height: 78vh;
   overflow-y: auto;
   box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.15);
   animation: ${slideIn} 0.5s ease-out;
 
   h3 {
     color: #bf360c;
-    font-size: 1.7rem;
+    font-size: 1.45rem;
     font-weight: 600;
     margin-bottom: 0.5px;
   }
@@ -55,11 +55,11 @@ export const ModalContent = styled.div`
 
 export const ModalPre = styled.div`
   background-color: #fff8f0;
-  padding: 18px;
+  padding: 14px;
   border-left: 4px solid #ffb74d;
-  border-radius: 10px;
+  border-radius: 8px;
   font-family: 'Courier New', monospace;
-  font-size: 0.95em;
+  font-size: 0.88em;
   overflow-x: auto;
-  margin-top: 1rem;
+  margin-top: 0.8rem;
 `;

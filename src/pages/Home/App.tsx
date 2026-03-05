@@ -197,7 +197,7 @@ export default function App() {
               checked={shuffleAnswers}
               onChange={() => setShuffleAnswers(!shuffleAnswers)}
             />
-            <label htmlFor="shuffle">Embaralhar Alternativas?</label>
+            <label htmlFor="shuffle">Embaralhar Alternativas</label>
           </S.CheckboxContainer>
 
           <S.Button onClick={generateXML}>Gerar XML</S.Button>
