@@ -31,7 +31,7 @@ export const Modal = styled.div<ModalProps>`
 `;
 
 export const ModalContent = styled.div`
-  background: linear-gradient(to bottom, #ffffff, #e3f2fd);
+  background: linear-gradient(to bottom, #ffffff, #fff3e0);
   padding: 30px;
   width: 85%;
   max-width: 900px;
@@ -44,7 +44,7 @@ export const ModalContent = styled.div`
   animation: ${slideIn} 0.5s ease-out;
 
   h3 {
-    color: #1a237e;
+    color: #bf360c;
     font-size: 1.7rem;
     font-weight: 600;
     margin-bottom: 0.5px;
@@ -59,7 +59,7 @@ export const ModalContent = styled.div`
 `;
 
 export const Button = styled.button`
-  background: linear-gradient(135deg, #1565c0, #0d47a1);
+  background: linear-gradient(135deg, #fb8c00, #e65100);
   color: #fff;
   font-size: 1rem;
   padding: 10px 25px;
@@ -75,7 +75,7 @@ export const Button = styled.button`
 `;
 
 export const XmlBox = styled.pre`
-  background-color: #f0f4f8;
+  background-color: #fff8f0;
   padding: 20px;
   border-radius: 8px;
   font-size: 1rem;
@@ -86,12 +86,12 @@ export const XmlBox = styled.pre`
   margin-top: 10px;
   max-height: 45vh;
   overflow-y: auto;
-  border: 1px solid #d1d9e6;
+  border: 1px solid #ffd8a8;
 `;
 
 export const WarningBox = styled.div`
-  background-color: #fffbe6;
-  border: 1px solid #ffe58f;
+  background-color: #fff4e5;
+  border: 1px solid #ffcc80;
   border-radius: 4px;
   padding: 8px 16px;
   margin-top: 16px;
@@ -99,7 +99,7 @@ export const WarningBox = styled.div`
 
   h4 {
     margin-top: 0;
-    color: #faad14;
+    color: #ef6c00;
   }
 
   ul {

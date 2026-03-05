@@ -31,11 +31,13 @@ export default function App() {
     const handlePaste = (e: ClipboardEvent) => {
       const items = e.clipboardData?.items;
       if (!items) return;
+
       for (const item of items) {
         if (item.type.startsWith('image')) {
           e.preventDefault();
           const file = item.getAsFile();
           if (!file) return;
+
           const reader = new FileReader();
           reader.onloadend = () => {
             const base64 = reader.result as string;
@@ -76,7 +78,7 @@ export default function App() {
       }
     });
 
-    parsedQuestions.forEach(q => {
+    parsedQuestions.forEach((q) => {
       q.questionText = q.questionText.replace(/\[(imagem\d+)\]/gi, (match, imageId: string) => {
         const base64 = imageMapRef.current[imageId];
         return base64 ? `<img src="${base64}" /><br>` : match;
@@ -90,7 +92,8 @@ export default function App() {
   };
 
   const copyText = () => {
-    navigator.clipboard.writeText(xmlContent)
+    navigator.clipboard
+      .writeText(xmlContent)
       .then(() => alert('Texto copiado para a área de transferência!'))
       .catch((err) => console.error('Erro ao copiar:', err));
   };
@@ -106,6 +109,7 @@ export default function App() {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64 = reader.result as string;
@@ -140,6 +144,7 @@ export default function App() {
     const content = textarea.value;
     const regex = /\[imagem(\d+)\]/gi;
     let match;
+
     while ((match = regex.exec(content)) !== null) {
       const tag = match[0];
       const key = tag.replace(/\[|\]/g, '');
@@ -182,12 +187,7 @@ export default function App() {
         <S.ActionsContainer>
           <S.ImageUploadContainer>
             <label htmlFor="image-upload">Inserir Imagem</label>
-            <input
-              id="image-upload"
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-            />
+            <input id="image-upload" type="file" accept="image/*" onChange={handleImageUpload} />
           </S.ImageUploadContainer>
 
           <S.CheckboxContainer>
@@ -202,13 +202,9 @@ export default function App() {
 
           <S.Button onClick={generateXML}>Gerar XML</S.Button>
         </S.ActionsContainer>
-
       </S.Container>
 
-      <InfoModal
-        visible={showInfo}
-        onClose={() => toggleModal('info', false)}
-      />
+      <InfoModal visible={showInfo} onClose={() => toggleModal('info', false)} />
 
       <XmlOutputModal
         visible={showXml}
@@ -220,7 +216,7 @@ export default function App() {
       />
 
       <S.Footer>
-        <p>Daniel Holanda © 2025</p>
+        <p>Desenvolvido por Daniel Holanda</p>
       </S.Footer>
     </>
   );

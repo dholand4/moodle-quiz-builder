@@ -11,10 +11,11 @@ export const Container = styled.div`
   max-width: 1000px;
   border-radius: 25px;
   margin: 2rem auto;
+  border: 1px solid #ffb74a;
 `;
 
 export const Title = styled.h1`
-  color: #0d47a1;
+  color: #e65100;
   font-size: 2rem;
   font-weight: 700;
   text-align: center;
@@ -27,7 +28,7 @@ export const Title = styled.h1`
 export const Buttoninfo = styled.button`
   background: none;
   border: none;
-  color: #4f72a7ff;
+  color: #c26d00;
   font-size: 1.5rem;
   margin-left: 10px;
   margin-top: 7px;
@@ -36,7 +37,7 @@ export const Buttoninfo = styled.button`
   padding: 0 5px;
 
   &:hover {
-    color: #041a30ff;
+    color: #7a2e00;
   }
 `;
 
@@ -48,7 +49,7 @@ export const Textarea = styled.textarea`
   width: 100%;
   min-height: 200px;
   border-radius: 10px;
-  border: 1px solid #90caf9;
+    border: 1px solid #ffb74a;
   padding: 12px;
   font-size: 1.1rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -57,8 +58,8 @@ export const Textarea = styled.textarea`
   box-sizing: border-box;
 
   &:focus {
-    border-color: #1a237e;
-    box-shadow: 0 0 8px rgba(26, 35, 126, 0.4);
+    border-color: #df8468;
+    box-shadow: 0 0 8px #e65100;
     outline: none;
   }
 `;
@@ -75,17 +76,17 @@ export const ActionsContainer = styled.div`
 export const ImageUploadContainer = styled.div`
   label {
     display: inline-block;
-    background-color: #e3f2fd;
-    color: #0d47a1;
+    background-color: #fff3e0;
+    color: #e65100;
     padding: 10px 20px;
     border-radius: 30px;
     cursor: pointer;
     font-weight: 500;
     transition: all 0.2s ease;
-    border: 1px solid #90caf9;
+    border: 1px solid #ffcc80;
 
     &:hover {
-      background-color: #bbdefb;
+      background-color: #ffe0b2;
     }
   }
 
@@ -112,7 +113,7 @@ export const CheckboxContainer = styled.div`
 `;
 
 export const Button = styled.button`
-  background: linear-gradient(135deg, #1565c0, #0d47a1);
+  background: linear-gradient(135deg, #fb8c00, #e65100);
   color: #fff;
   font-size: 1.1rem;
   padding: 12px 30px;
@@ -123,20 +124,21 @@ export const Button = styled.button`
   font-weight: 500;
   width: 100%;
   max-width: 400px;
+  margin-top: 10px;
 
   &:hover {
     transform: scale(1.03);
-    box-shadow: 0 4px 15px rgba(21, 101, 192, 0.4);
+    box-shadow: 0 4px 15px rgba(251, 140, 0, 0.35);
   }
 `;
 
 export const Footer = styled.footer`
-  color: #0d47a1;
+  color: #e65100;
   text-align: center;
   width: 100%;
   font-size: 0.9em;
   font-weight: 500;
-  margin-top: -60px;
+  margin-top: -5px;
 `;
 
 export const ImagePreview = styled.div`

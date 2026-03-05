@@ -10,10 +10,6 @@ export interface Question {
     correctAnswer: string;
 }
 
-const formatBoldText = (text: string): string => {
-    return text.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
-};
-
 const escapeXML = (str: string): string =>
     str
         .replace(/&/g, '&amp;')
@@ -21,6 +17,13 @@ const escapeXML = (str: string): string =>
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&apos;');
+
+const formatInlineText = (text: string): string => {
+    const escaped = escapeXML(text);
+    return escaped
+        .replace(/\*(.*?)\*/g, '<strong>$1</strong>')
+        .replace(/_(.*?)_/g, '<em>$1</em>');
+};
 
 export function parseTextToQuestions(inputText: string): Question[] {
     const questions: Question[] = [];
@@ -37,14 +40,14 @@ export function parseTextToQuestions(inputText: string): Question[] {
     const finalizeQuestion = () => {
         if (currentQuestion.textBuffer && currentQuestion.options && currentQuestion.options.length > 0) {
             const rawText = currentQuestion.textBuffer.join('\n').trim();
-            const formattedText = formatBoldText(rawText);
+            const formattedText = formatInlineText(rawText);
 
             questions.push({
                 identifier: currentQuestion.identifier!,
                 questionText: formattedText,
                 options: currentQuestion.options.map(opt => ({
                     ...opt,
-                    text: escapeXML(formatBoldText(opt.text))
+                    text: formatInlineText(opt.text)
                 })),
                 correctAnswer: currentQuestion.correctAnswer || '',
             });

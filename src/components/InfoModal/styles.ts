@@ -32,7 +32,7 @@ export const Modal = styled.div<ModalProps>`
 `;
 
 export const ModalContent = styled.div`
-  background: linear-gradient(to bottom, #ffffff, #e3f2fd);
+  background: linear-gradient(to bottom, #ffffff, #fff3e0);
   padding: 30px;
   width: 85%;
   max-width: 900px;
@@ -46,7 +46,7 @@ export const ModalContent = styled.div`
   animation: ${slideIn} 0.5s ease-out;
 
   h3 {
-    color: #1a237e;
+    color: #bf360c;
     font-size: 1.7rem;
     font-weight: 600;
     margin-bottom: 0.5px;
@@ -54,9 +54,9 @@ export const ModalContent = styled.div`
 `;
 
 export const ModalPre = styled.div`
-  background-color: #f0f8ff;
+  background-color: #fff8f0;
   padding: 18px;
-  border-left: 4px solid #64b5f6;
+  border-left: 4px solid #ffb74d;
   border-radius: 10px;
   font-family: 'Courier New', monospace;
   font-size: 0.95em;
