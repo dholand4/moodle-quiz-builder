@@ -74,6 +74,14 @@ export const ActionsContainer = styled.div`
   margin-top: 16px;
 `;
 
+export const UploadRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+`;
+
 export const ImageUploadContainer = styled.div`
   label {
     display: inline-block;
@@ -135,6 +143,13 @@ export const Button = styled.button`
     transform: scale(1.03);
     box-shadow: 0 4px 15px rgba(251, 140, 0, 0.35);
   }
+`;
+
+export const StatusText = styled.p`
+  font-size: 0.9rem;
+  color: #b71c1c;
+  margin: 0;
+  text-align: center;
 `;
 
 export const Footer = styled.footer`

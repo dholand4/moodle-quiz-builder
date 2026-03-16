@@ -1,14 +1,20 @@
 import { useState, useRef, useEffect } from 'react';
-import { Question, parseTextToQuestions, generateMoodleXML } from './xmlParser';
+import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist/build/pdf.mjs';
+import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.mjs?url';
+import { Question, parseTextToQuestions, generateMoodleXML, normalizeExtractedText } from './xmlParser';
 import * as S from './styles';
 import InfoModal from '../../components/InfoModal';
 import XmlOutputModal from '../../components/XmlOutputModal';
+
+GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 export default function App() {
   const [xmlContent, setXmlContent] = useState<string>('');
   const [showInfo, setShowInfo] = useState<boolean>(false);
   const [showXml, setShowXml] = useState<boolean>(false);
   const [shuffleAnswers, setShuffleAnswers] = useState<boolean>(false);
+  const [pdfLoading, setPdfLoading] = useState<boolean>(false);
+  const [pdfError, setPdfError] = useState<string>('');
   const questionsRef = useRef<HTMLTextAreaElement>(null);
   const [questionStats, setQuestionStats] = useState<{ total: number; issues: string[] }>({ total: 0, issues: [] });
 
@@ -18,10 +24,31 @@ export default function App() {
   const [hoveredImage, setHoveredImage] = useState<string | null>(null);
   const [previewPos, setPreviewPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
-  const adjustTextareaHeight = (e: React.FormEvent<HTMLTextAreaElement>) => {
-    const textarea = e.currentTarget;
+  const adjustTextareaHeight = (textarea: HTMLTextAreaElement) => {
+    const selectionStart = textarea.selectionStart;
+    const selectionEnd = textarea.selectionEnd;
+    const scrollTop = textarea.scrollTop;
+    const windowScrollTop = window.scrollY;
     textarea.style.height = 'auto';
     textarea.style.height = `${textarea.scrollHeight}px`;
+    textarea.selectionStart = selectionStart;
+    textarea.selectionEnd = selectionEnd;
+    textarea.scrollTop = scrollTop;
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: windowScrollTop });
+    });
+  };
+
+  const normalizeTextareaValue = (textarea: HTMLTextAreaElement) => {
+    const value = textarea.value;
+    const normalized = normalizeExtractedText(value);
+    if (normalized !== value) {
+      const selectionStart = textarea.selectionStart;
+      const selectionEnd = textarea.selectionEnd;
+      textarea.value = normalized;
+      textarea.selectionStart = selectionStart;
+      textarea.selectionEnd = selectionEnd;
+    }
   };
 
   useEffect(() => {
@@ -48,8 +75,7 @@ export default function App() {
 
             const currentTextarea = questionsRef.current;
             if (currentTextarea) {
-              currentTextarea.style.height = 'auto';
-              currentTextarea.style.height = `${currentTextarea.scrollHeight}px`;
+              adjustTextareaHeight(currentTextarea);
             }
           };
           reader.readAsDataURL(file);
@@ -120,11 +146,67 @@ export default function App() {
 
       const currentTextarea = questionsRef.current;
       if (currentTextarea) {
-        currentTextarea.style.height = 'auto';
-        currentTextarea.style.height = `${currentTextarea.scrollHeight}px`;
+        adjustTextareaHeight(currentTextarea);
       }
     };
     reader.readAsDataURL(file);
+  };
+
+  const extractTextFromPdf = async (file: File): Promise<string> => {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await getDocument({ data: arrayBuffer }).promise;
+    const lines: string[] = [];
+
+    for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+      const page = await pdf.getPage(pageNumber);
+      const textContent = await page.getTextContent();
+      let currentLine = '';
+
+      for (const item of textContent.items as { str?: string; hasEOL?: boolean }[]) {
+        const text = item.str ?? '';
+        currentLine += text;
+
+        if (item.hasEOL) {
+          if (currentLine.trim()) lines.push(currentLine.trim());
+          currentLine = '';
+        } else {
+          currentLine += ' ';
+        }
+      }
+
+      if (currentLine.trim()) {
+        lines.push(currentLine.trim());
+      }
+
+      if (pageNumber < pdf.numPages) {
+        lines.push('');
+      }
+    }
+
+    return lines.join('\n').trim();
+  };
+
+  const handlePdfUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setPdfLoading(true);
+    setPdfError('');
+
+    try {
+      const extractedText = await extractTextFromPdf(file);
+      const normalizedText = normalizeExtractedText(extractedText);
+      const textarea = questionsRef.current;
+      if (textarea) {
+        textarea.value = normalizedText;
+        adjustTextareaHeight(textarea);
+      }
+    } catch (err) {
+      console.error(err);
+      setPdfError('NÃ£o foi possÃ­vel extrair o texto do PDF. Verifique se o PDF tem texto selecionÃ¡vel.');
+    } finally {
+      setPdfLoading(false);
+    }
   };
 
   const insertAtCursor = (text: string) => {
@@ -136,6 +218,37 @@ export default function App() {
     textarea.value = currentText.substring(0, start) + text + currentText.substring(end);
     textarea.selectionStart = textarea.selectionEnd = start + text.length;
     textarea.focus();
+    adjustTextareaHeight(textarea);
+  };
+
+  const handleTextPaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const items = e.clipboardData?.items;
+    if (items) {
+      for (const item of items) {
+        if (item.type.startsWith('image')) {
+          return;
+        }
+      }
+    }
+
+    const text = e.clipboardData?.getData('text');
+    if (!text) return;
+
+    e.preventDefault();
+    const normalizedText = normalizeExtractedText(text);
+    insertAtCursor(normalizedText);
+  };
+
+  const handleTextInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
+    const textarea = e.currentTarget;
+    const inputEvent = e.nativeEvent as InputEvent;
+    if (inputEvent?.isComposing) {
+      adjustTextareaHeight(textarea);
+      return;
+    }
+
+    normalizeTextareaValue(textarea);
+    adjustTextareaHeight(textarea);
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLTextAreaElement>) => {
@@ -175,6 +288,7 @@ export default function App() {
             placeholder="Digite ou cole suas questões aqui... Você pode colar imagens diretamente no texto!"
             onMouseMove={handleMouseMove}
             onInput={adjustTextareaHeight}
+            onPaste={handleTextPaste}
           />
         </S.QuestionContainer>
 
@@ -185,10 +299,25 @@ export default function App() {
         )}
 
         <S.ActionsContainer>
-          <S.ImageUploadContainer>
-            <label htmlFor="image-upload">Inserir Imagem</label>
-            <input id="image-upload" type="file" accept="image/*" onChange={handleImageUpload} />
-          </S.ImageUploadContainer>
+          <S.UploadRow>
+            <S.ImageUploadContainer>
+              <label htmlFor="pdf-upload">{pdfLoading ? 'Lendo PDF...' : 'Importar PDF'}</label>
+              <input
+                id="pdf-upload"
+                type="file"
+                accept="application/pdf"
+                onChange={handlePdfUpload}
+                disabled={pdfLoading}
+              />
+            </S.ImageUploadContainer>
+
+            <S.ImageUploadContainer>
+              <label htmlFor="image-upload">Inserir Imagem</label>
+              <input id="image-upload" type="file" accept="image/*" onChange={handleImageUpload} />
+            </S.ImageUploadContainer>
+          </S.UploadRow>
+
+          {pdfError && <S.StatusText>{pdfError}</S.StatusText>}
 
           <S.CheckboxContainer>
             <input
@@ -221,3 +350,7 @@ export default function App() {
     </>
   );
 }
+
+
+
+

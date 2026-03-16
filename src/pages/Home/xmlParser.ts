@@ -10,6 +10,120 @@ export interface Question {
     correctAnswer: string;
 }
 
+export function normalizeExtractedText(inputText: string): string {
+    if (!inputText) return '';
+
+    const rawLines = inputText
+        .split(/\r?\n/)
+        .map((line) => line.replace(/\s+/g, ' ').trim());
+
+    const lines = rawLines.filter((line) => line.length > 0);
+    const normalized: string[] = [];
+
+    const headerRegex = /^(?:quest[Ã£a]o\s*)?\d+\s*[.-]?\s*/i;
+    const optionRegex = /^([a-hA-H])[.)]\s+/;
+    const romanMarkerRegex = /([IVXLCDM]{1,4}\.)\s+/g;
+    const romanLineRegex = /^[IVXLCDM]{1,4}\.\s+/;
+
+    const splitByRomanMarkers = (text: string): { lead: string; items: string[] } => {
+        romanMarkerRegex.lastIndex = 0;
+        const matches = [...text.matchAll(romanMarkerRegex)];
+        if (matches.length === 0) {
+            return { lead: text.trim(), items: [] };
+        }
+
+        const firstIndex = matches[0].index ?? 0;
+        const lead = text.slice(0, firstIndex).trim();
+        const items: string[] = [];
+
+        for (let i = 0; i < matches.length; i++) {
+            const marker = matches[i][1];
+            const start = (matches[i].index ?? 0) + matches[i][0].length;
+            const end = i + 1 < matches.length ? (matches[i + 1].index ?? text.length) : text.length;
+            const body = text.slice(start, end).trim();
+            items.push(`${marker} ${body}`.trim());
+        }
+
+        return { lead, items };
+    };
+
+    for (const line of lines) {
+        const isHeader = headerRegex.test(line);
+        const isOption = optionRegex.test(line);
+        romanMarkerRegex.lastIndex = 0;
+        const hasRomanMarkers = romanMarkerRegex.test(line);
+
+        if (normalized.length === 0) {
+            if (!isOption && hasRomanMarkers) {
+                const { lead, items } = splitByRomanMarkers(line);
+                if (lead) normalized.push(lead);
+                normalized.push(...items);
+            } else {
+                normalized.push(line);
+            }
+            continue;
+        }
+
+        const prev = normalized[normalized.length - 1];
+        const prevIsHeader = headerRegex.test(prev);
+        const prevIsOption = optionRegex.test(prev);
+
+        if (isHeader && hasRomanMarkers) {
+            const last = normalized[normalized.length - 1];
+            if (last !== '') {
+                normalized.push('');
+            }
+            const { lead, items } = splitByRomanMarkers(line);
+            if (lead) normalized.push(lead);
+            normalized.push(...items);
+            continue;
+        }
+
+        if (isHeader) {
+            const last = normalized[normalized.length - 1];
+            if (last !== '') {
+                normalized.push('');
+            }
+            normalized.push(line);
+            continue;
+        }
+
+        if (isOption) {
+            normalized.push(line);
+            continue;
+        }
+
+        if (hasRomanMarkers) {
+            const { lead, items } = splitByRomanMarkers(line);
+            if (lead) {
+                if (prevIsHeader || (!prevIsOption && prev !== '')) {
+                    normalized[normalized.length - 1] = `${prev} ${lead}`.trim();
+                } else {
+                    normalized.push(lead);
+                }
+            }
+            if (items.length > 0) {
+                normalized.push(...items);
+            }
+            continue;
+        }
+
+        if (prevIsOption || romanLineRegex.test(prev)) {
+            normalized[normalized.length - 1] = `${prev} ${line}`;
+            continue;
+        }
+
+        if (prevIsHeader || (!prevIsHeader && !prevIsOption && prev !== '')) {
+            normalized[normalized.length - 1] = `${prev} ${line}`;
+            continue;
+        }
+
+        normalized.push(line);
+    }
+
+    return normalized.join('\n');
+}
+
 const escapeXML = (str: string): string =>
     str
         .replace(/&/g, '&amp;')
