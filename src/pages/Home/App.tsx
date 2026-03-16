@@ -24,7 +24,7 @@ export default function App() {
   const [hoveredImage, setHoveredImage] = useState<string | null>(null);
   const [previewPos, setPreviewPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
-  const adjustTextareaHeight = (textarea: HTMLTextAreaElement) => {
+  const adjustTextareaHeightElement = (textarea: HTMLTextAreaElement) => {
     const selectionStart = textarea.selectionStart;
     const selectionEnd = textarea.selectionEnd;
     const scrollTop = textarea.scrollTop;
@@ -39,16 +39,8 @@ export default function App() {
     });
   };
 
-  const normalizeTextareaValue = (textarea: HTMLTextAreaElement) => {
-    const value = textarea.value;
-    const normalized = normalizeExtractedText(value);
-    if (normalized !== value) {
-      const selectionStart = textarea.selectionStart;
-      const selectionEnd = textarea.selectionEnd;
-      textarea.value = normalized;
-      textarea.selectionStart = selectionStart;
-      textarea.selectionEnd = selectionEnd;
-    }
+  const adjustTextareaHeight = (e: React.FormEvent<HTMLTextAreaElement>) => {
+    adjustTextareaHeightElement(e.currentTarget);
   };
 
   useEffect(() => {
@@ -75,7 +67,7 @@ export default function App() {
 
             const currentTextarea = questionsRef.current;
             if (currentTextarea) {
-              adjustTextareaHeight(currentTextarea);
+              adjustTextareaHeightElement(currentTextarea);
             }
           };
           reader.readAsDataURL(file);
@@ -146,7 +138,7 @@ export default function App() {
 
       const currentTextarea = questionsRef.current;
       if (currentTextarea) {
-        adjustTextareaHeight(currentTextarea);
+        adjustTextareaHeightElement(currentTextarea);
       }
     };
     reader.readAsDataURL(file);
@@ -199,7 +191,7 @@ export default function App() {
       const textarea = questionsRef.current;
       if (textarea) {
         textarea.value = normalizedText;
-        adjustTextareaHeight(textarea);
+        adjustTextareaHeightElement(textarea);
       }
     } catch (err) {
       console.error(err);
@@ -218,7 +210,7 @@ export default function App() {
     textarea.value = currentText.substring(0, start) + text + currentText.substring(end);
     textarea.selectionStart = textarea.selectionEnd = start + text.length;
     textarea.focus();
-    adjustTextareaHeight(textarea);
+    adjustTextareaHeightElement(textarea);
   };
 
   const handleTextPaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
@@ -239,17 +231,6 @@ export default function App() {
     insertAtCursor(normalizedText);
   };
 
-  const handleTextInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
-    const textarea = e.currentTarget;
-    const inputEvent = e.nativeEvent as InputEvent;
-    if (inputEvent?.isComposing) {
-      adjustTextareaHeight(textarea);
-      return;
-    }
-
-    normalizeTextareaValue(textarea);
-    adjustTextareaHeight(textarea);
-  };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLTextAreaElement>) => {
     const textarea = e.currentTarget;
