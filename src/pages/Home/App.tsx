@@ -15,6 +15,7 @@ export default function App() {
   const [shuffleAnswers, setShuffleAnswers] = useState<boolean>(false);
   const [pdfLoading, setPdfLoading] = useState<boolean>(false);
   const [pdfError, setPdfError] = useState<string>('');
+  const [isDragOver, setIsDragOver] = useState<boolean>(false);
   const questionsRef = useRef<HTMLTextAreaElement>(null);
   const [questionStats, setQuestionStats] = useState<{ total: number; issues: string[] }>({ total: 0, issues: [] });
 
@@ -178,27 +179,54 @@ export default function App() {
     return lines.join('\n').trim();
   };
 
-  const handlePdfUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const processPdfFiles = async (files: File[]) => {
+    const pdfFiles = files.filter(
+      (file) => file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'),
+    );
+
+    if (pdfFiles.length === 0) {
+      setPdfError('Arquivo invalido. Envie um arquivo PDF.');
+      return;
+    }
 
     setPdfLoading(true);
     setPdfError('');
 
     try {
-      const extractedText = await extractTextFromPdf(file);
-      const normalizedText = normalizeExtractedText(extractedText);
+      const normalizedParts: string[] = [];
+
+      for (const file of pdfFiles) {
+        const extractedText = await extractTextFromPdf(file);
+        const normalizedText = normalizeExtractedText(extractedText).trim();
+        if (normalizedText) {
+          normalizedParts.push(normalizedText);
+        }
+      }
+
       const textarea = questionsRef.current;
-      if (textarea) {
-        textarea.value = normalizedText;
+      if (textarea && normalizedParts.length > 0) {
+        const current = textarea.value.trim();
+        const incoming = normalizedParts.join('\n\n');
+        textarea.value = current ? `${current}\n\n${incoming}` : incoming;
+        textarea.selectionStart = textarea.value.length;
+        textarea.selectionEnd = textarea.value.length;
+        textarea.focus();
         adjustTextareaHeightElement(textarea);
       }
     } catch (err) {
       console.error(err);
-      setPdfError('NÃ£o foi possÃ­vel extrair o texto do PDF. Verifique se o PDF tem texto selecionÃ¡vel.');
+      setPdfError('Nao foi possivel extrair o texto do PDF. Verifique se o PDF tem texto selecionavel.');
     } finally {
       setPdfLoading(false);
     }
+  };
+
+  const handlePdfUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files ? Array.from(event.target.files) : [];
+    if (files.length === 0) return;
+
+    await processPdfFiles(files);
+    event.target.value = '';
   };
 
   const insertAtCursor = (text: string) => {
@@ -229,6 +257,26 @@ export default function App() {
     e.preventDefault();
     const normalizedText = normalizeExtractedText(text);
     insertAtCursor(normalizedText);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragOver(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+    setIsDragOver(false);
+
+    const files = e.dataTransfer.files ? Array.from(e.dataTransfer.files) : [];
+    if (files.length === 0) return;
+
+    await processPdfFiles(files);
   };
 
 
@@ -270,6 +318,10 @@ export default function App() {
             onMouseMove={handleMouseMove}
             onInput={adjustTextareaHeight}
             onPaste={handleTextPaste}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            $isDragOver={isDragOver}
           />
         </S.QuestionContainer>
 
@@ -287,6 +339,7 @@ export default function App() {
                 id="pdf-upload"
                 type="file"
                 accept="application/pdf"
+                multiple
                 onChange={handlePdfUpload}
                 disabled={pdfLoading}
               />
@@ -331,6 +384,7 @@ export default function App() {
     </>
   );
 }
+
 
 
 

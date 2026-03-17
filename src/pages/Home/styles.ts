@@ -45,11 +45,11 @@ export const QuestionContainer = styled.div`
   width: 100%;
 `;
 
-export const Textarea = styled.textarea`
+export const Textarea = styled.textarea<{ $isDragOver?: boolean }>`
   width: 100%;
   min-height: 170px;
   border-radius: 10px;
-    border: 1px solid #ffb74a;
+  border: 2px solid ${({ $isDragOver }) => ($isDragOver ? '#e65100' : '#ffb74a')};
   padding: 10px;
   font-size: 1rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -63,6 +63,13 @@ export const Textarea = styled.textarea`
     box-shadow: 0 0 8px #e65100;
     outline: none;
   }
+
+  ${({ $isDragOver }) =>
+    $isDragOver &&
+    `
+    background-color: #fffaf2;
+    box-shadow: 0 0 0 3px rgba(230, 81, 0, 0.16);
+  `}
 `;
 
 export const ActionsContainer = styled.div`
