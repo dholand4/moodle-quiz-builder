@@ -18,7 +18,7 @@ Projeto **Converter XML**, Projeto desenvolvido para facilitar no cadastro de qu
 - Link do Projeto: https://dholand4.github.io/converter_xml/
 <div align="center">
 
-  <img style="margin: 5px" alt="image-taco" src="https://i.imgur.com/KhGB1yK.png" width="1122">
+  <img style="margin: 5px" alt="image-taco" src="https://i.imgur.com/CDWHaTy.png" width="1122">
 </div>
 
 ---
