@@ -7,11 +7,13 @@ export const Container = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 45px;
-  max-width: 900px;
+  padding: 48px 56px;
+  max-width: 1400px;
+  width: calc(100% - 48px);
   border-radius: 20px;
   margin: 1.5rem auto;
   border: 1px solid #ffb74a;
+  box-sizing: border-box;
 `;
 
 export const Title = styled.h1`
@@ -43,6 +45,47 @@ export const Buttoninfo = styled.button`
 
 export const QuestionContainer = styled.div`
   width: 100%;
+`;
+
+export const ModePanel = styled.div<{ $dir: 'left' | 'right' }>`
+  width: 100%;
+  animation: ${({ $dir }) => ($dir === 'right' ? 'fadeSlideLeft' : 'fadeSlideRight')} 0.2s ease;
+
+  @keyframes fadeSlideRight {
+    from { opacity: 0; transform: translateX(28px) scale(0.99); }
+    to   { opacity: 1; transform: translateX(0)    scale(1); }
+  }
+
+  @keyframes fadeSlideLeft {
+    from { opacity: 0; transform: translateX(-28px) scale(0.99); }
+    to   { opacity: 1; transform: translateX(0)     scale(1); }
+  }
+`;
+
+export const ModeSwitcher = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  background: #fff8f0;
+  border: 1px solid #ffe0b2;
+  border-radius: 30px;
+  padding: 4px;
+`;
+
+export const ModeBtn = styled.button<{ $active?: boolean }>`
+  background: ${({ $active }) => ($active ? 'linear-gradient(135deg, #fb8c00, #e65100)' : 'none')};
+  color: ${({ $active }) => ($active ? '#fff' : '#e65100')};
+  border: none;
+  border-radius: 24px;
+  padding: 6px 18px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${({ $active }) => ($active ? 'linear-gradient(135deg, #fb8c00, #e65100)' : '#fff3e0')};
+  }
 `;
 
 export const Textarea = styled.textarea<{ $isDragOver?: boolean }>`
@@ -167,6 +210,7 @@ export const Footer = styled.footer`
   font-weight: 500;
   margin-top: -8px;
 `;
+
 
 export const ImagePreview = styled.div`
   position: fixed;
