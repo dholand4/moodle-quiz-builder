@@ -97,18 +97,57 @@ const quizEditorGlobal = forwardRef<QuizEditorHandle, IQuizEditorProps>(
       const view = getView();
       if (!view) return true;
       const { from, to } = view.state.selection.main;
+      const doc = view.state.doc.toString();
+
       if (from === to) {
-        const placeholder = '*negrito*';
-        view.dispatch({
-          changes: { from, insert: placeholder },
-          selection: { anchor: from + 1, head: from + placeholder.length - 1 },
-        });
+        // Sem seleção: verifica se cursor está dentro de **...**
+        const line = view.state.doc.lineAt(from);
+        const lineText = doc.slice(line.from, line.to);
+        const cursorInLine = from - line.from;
+        const regex = /\*\*([^*\n]+)\*\*/g;
+        let m: RegExpExecArray | null;
+        let toggled = false;
+        while ((m = regex.exec(lineText)) !== null) {
+          if (cursorInLine >= m.index && cursorInLine <= m.index + m[0].length) {
+            const absFrom = line.from + m.index;
+            const absTo = absFrom + m[0].length;
+            const inner = m[1];
+            view.dispatch({
+              changes: { from: absFrom, to: absTo, insert: inner },
+              selection: { anchor: absFrom + inner.length },
+            });
+            toggled = true;
+            break;
+          }
+        }
+        if (!toggled) {
+          const placeholder = '**negrito**';
+          view.dispatch({
+            changes: { from, insert: placeholder },
+            selection: { anchor: from + 2, head: from + placeholder.length - 2 },
+          });
+        }
       } else {
         const selected = view.state.doc.sliceString(from, to);
-        view.dispatch({
-          changes: { from, to, insert: `*${selected}*` },
-          selection: { anchor: from, head: from + selected.length + 2 },
-        });
+        // Seleção já contém os ** (ex: selecionou **texto**)
+        if (selected.startsWith('**') && selected.endsWith('**') && selected.length > 4) {
+          const inner = selected.slice(2, -2);
+          view.dispatch({
+            changes: { from, to, insert: inner },
+            selection: { anchor: from, head: from + inner.length },
+          });
+        // Seleção está cercada por ** externos
+        } else if (from >= 2 && to + 2 <= doc.length && doc.slice(from - 2, from) === '**' && doc.slice(to, to + 2) === '**') {
+          view.dispatch({
+            changes: [{ from: to, to: to + 2, insert: '' }, { from: from - 2, to: from, insert: '' }],
+            selection: { anchor: from - 2, head: to - 2 },
+          });
+        } else {
+          view.dispatch({
+            changes: { from, to, insert: `**${selected}**` },
+            selection: { anchor: from, head: from + selected.length + 4 },
+          });
+        }
       }
       view.focus();
       return true;

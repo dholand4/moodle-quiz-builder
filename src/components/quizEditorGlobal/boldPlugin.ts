@@ -36,14 +36,14 @@ function build(view: EditorView): DecorationSet {
   const builder = new RangeSetBuilder<Decoration>();
   const doc = view.state.doc.toString();
   const matches: { from: number; textFrom: number; textTo: number; to: number }[] = [];
-  const regex = /\*([^*\n]+)\*/g;
+  const regex = /\*\*([^*\n]+)\*\*/g;
   let m: RegExpExecArray | null;
 
   while ((m = regex.exec(doc)) !== null) {
     matches.push({
       from: m.index,
-      textFrom: m.index + 1,
-      textTo: m.index + m[0].length - 1,
+      textFrom: m.index + 2,
+      textTo: m.index + m[0].length - 2,
       to: m.index + m[0].length,
     });
   }
@@ -71,10 +71,10 @@ function nodeToText(node: Node): string {
     const tag = el.tagName.toLowerCase();
     const inner = Array.from(el.childNodes).map(nodeToText).join('');
 
-    if (tag === 'b' || tag === 'strong') return `*${inner}*`;
+    if (tag === 'b' || tag === 'strong') return `**${inner}**`;
     if (tag === 'span') {
       const fw = (el as HTMLElement).style?.fontWeight;
-      if (fw === 'bold' || fw === '700') return `*${inner}*`;
+      if (fw === 'bold' || fw === '700') return `**${inner}**`;
     }
     if (tag === 'br') return '\n';
     if (tag === 'p' || tag === 'div') return inner + '\n';
