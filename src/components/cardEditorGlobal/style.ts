@@ -1,154 +1,208 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  width: 100%;
+  gap: 14px;
+
+  &::-webkit-scrollbar { width: 0; }
 `;
 
-export const Card = styled.div`
-  border: 1px solid #ffe0b2;
-  border-radius: 10px;
-  padding: 16px;
-  background: #fff;
-  position: relative;
+export const Grid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-items: start;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
-export const CardHeader = styled.div`
+export const Card = styled.div<{ $hasError?: boolean }>`
+  border: 1px solid ${({ $hasError }) => ($hasError ? 'var(--danger)' : 'var(--orange-200)')};
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--paper);
+  box-shadow: ${({ $hasError }) => ($hasError ? '0 0 0 3px var(--danger-bg)' : 'none')};
+`;
+
+export const CardHeader = styled.div<{ $hasError?: boolean }>`
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--orange-100);
+  background: ${({ $hasError }) => ($hasError ? 'var(--danger-bg)' : 'var(--paper-tint)')};
 `;
 
-export const CardLabel = styled.span`
-  font-size: 0.8rem;
+export const CardLabel = styled.span<{ $hasError?: boolean }>`
+  font-size: 10.5px;
   font-weight: 700;
-  color: #e65100;
-  text-transform: uppercase;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  color: ${({ $hasError }) => ($hasError ? 'var(--danger)' : 'var(--orange-500)')};
   letter-spacing: 0.04em;
+`;
+
+export const ErrorBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--paper);
+  color: var(--danger);
 `;
 
 export const RemoveCardBtn = styled.button`
   background: none;
   border: none;
-  color: #bbb;
+  color: var(--ink-400);
   cursor: pointer;
-  font-size: 1.1rem;
+  font-size: 14px;
   line-height: 1;
-  padding: 0 4px;
-  transition: color 0.2s;
+  padding: 2px 4px;
+  margin-left: auto;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
 
-  &:hover { color: #c62828; }
+  &:hover {
+    color: var(--danger);
+    background: var(--danger-bg);
+  }
 `;
 
 export const TextArea = styled.textarea`
   width: 100%;
-  min-height: 64px;
-  border: 1px solid #ffcc80;
-  border-radius: 6px;
-  padding: 8px;
-  font-size: 0.93rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  resize: vertical;
-  box-sizing: border-box;
-  margin-bottom: 12px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-900);
+  padding: 10px 12px 6px;
+  resize: none;
+  outline: none;
+  min-height: 48px;
+  line-height: 1.5;
+  display: block;
 
-  &:focus {
-    outline: none;
-    border-color: #fb8c00;
-    box-shadow: 0 0 0 2px rgba(251,140,0,0.15);
+  &::placeholder {
+    color: var(--ink-400);
+    font-weight: 400;
   }
 `;
 
 export const OptionsSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 3px;
+  padding: 4px 8px 8px;
 `;
 
-export const OptionRow = styled.div`
+export const OptionRow = styled.div<{ $correct?: boolean }>`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
+  padding: 5px 7px;
+  border-radius: 7px;
+  background: ${({ $correct }) => ($correct ? 'var(--success-bg)' : 'transparent')};
+  border: 1px solid ${({ $correct }) => ($correct ? 'rgba(31,138,91,0.25)' : 'transparent')};
+  transition: background 0.1s;
 `;
 
-export const OptionInput = styled.input`
-  flex: 1;
-  border: 1px solid #ffcc80;
-  border-radius: 6px;
-  padding: 6px 8px;
-  font-size: 0.9rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-
-  &:focus {
-    outline: none;
-    border-color: #fb8c00;
-    box-shadow: 0 0 0 2px rgba(251,140,0,0.15);
-  }
+export const OptionLetter = styled.span`
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--syn-option);
+  width: 14px;
+  flex-shrink: 0;
 `;
 
 export const CorrectRadio = styled.input`
   width: 16px;
   height: 16px;
   cursor: pointer;
-  accent-color: #2e7d32;
+  accent-color: var(--success);
+  flex-shrink: 0;
 `;
 
-export const OptionLetter = styled.span`
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #1565c0;
-  width: 18px;
-  flex-shrink: 0;
+export const OptionInput = styled.input`
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 12.5px;
+  font-family: inherit;
+  color: var(--ink-900);
+  outline: none;
+  min-width: 0;
+
+  &::placeholder {
+    color: var(--ink-400);
+  }
 `;
 
 export const RemoveOptBtn = styled.button`
   background: none;
   border: none;
-  color: #ccc;
+  color: var(--ink-300, var(--ink-400));
   cursor: pointer;
-  font-size: 1rem;
-  padding: 0;
+  font-size: 13px;
+  padding: 0 2px;
   line-height: 1;
+  border-radius: 3px;
   transition: color 0.2s;
+  flex-shrink: 0;
 
-  &:hover { color: #c62828; }
+  &:hover { color: var(--danger); }
 `;
 
 export const AddOptionBtn = styled.button`
   background: none;
-  border: 1px dashed #ffcc80;
+  border: 1px dashed var(--orange-300);
   border-radius: 6px;
-  color: #fb8c00;
-  padding: 4px 10px;
-  font-size: 0.83rem;
+  color: var(--orange-600);
+  padding: 3px 10px;
+  font-size: 11.5px;
+  font-family: inherit;
+  font-weight: 600;
   cursor: pointer;
-  margin-top: 4px;
-  transition: background 0.2s;
+  margin-top: 2px;
+  transition: background 0.15s;
 
-  &:hover { background: #fff3e0; }
+  &:hover { background: var(--orange-50); }
 `;
 
 export const AddCardBtn = styled.button`
-  border: 2px dashed #ffb74a;
+  border: 1.5px dashed var(--orange-300);
   border-radius: 10px;
   background: none;
-  color: #e65100;
-  font-size: 0.95rem;
+  color: var(--orange-600);
+  font-size: 12.5px;
   font-weight: 600;
-  padding: 12px;
+  font-family: inherit;
+  padding: 10px;
   cursor: pointer;
   width: 100%;
-  transition: background 0.2s;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  grid-column: 1 / -1;
 
-  &:hover { background: #fff3e0; }
+  &:hover { background: var(--orange-50); }
 `;
 
 export const ExportHint = styled.p`
-  font-size: 0.78rem;
-  color: #aaa;
+  font-size: 11px;
+  color: var(--ink-400);
   text-align: center;
   margin: 0;
+  grid-column: 1 / -1;
 `;
