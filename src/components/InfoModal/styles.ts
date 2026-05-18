@@ -1,4 +1,3 @@
-// src/components/InfoModal/styles.ts
 import styled, { keyframes } from 'styled-components';
 
 interface ModalProps {
@@ -6,60 +5,57 @@ interface ModalProps {
 }
 
 const slideIn = keyframes`
-  from {
-    transform: translateY(-20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  from { transform: translateY(-16px); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
 `;
 
 export const Modal = styled.div<ModalProps>`
   display: ${({ visible }) => (visible ? 'flex' : 'none')};
   position: fixed;
   z-index: 1000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+  inset: 0;
+  background: rgba(31, 20, 12, 0.45);
   backdrop-filter: blur(4px);
   justify-content: center;
   align-items: flex-start;
-  padding-top: 4vh;
+  padding-top: 5vh;
 `;
 
 export const ModalContent = styled.div`
-  background: linear-gradient(to bottom, #ffffff, #fff3e0);
-  padding: 24px;
-  width: 82%;
-  max-width: 780px;
-  border-radius: 12px;
+  background: var(--paper);
+  padding: 24px 28px;
+  width: 90%;
+  max-width: 740px;
+  border-radius: 16px;
   text-align: left;
   display: flex;
   flex-direction: column;
-  max-height: 78vh;
+  max-height: 82vh;
   overflow-y: auto;
-  box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.15);
-  animation: ${slideIn} 0.5s ease-out;
+  box-shadow: 0 12px 40px rgba(31, 20, 12, 0.18);
+  border: 1px solid var(--orange-200);
+  animation: ${slideIn} 0.25s ease-out;
 
   h3 {
-    color: #bf360c;
-    font-size: 1.45rem;
-    font-weight: 600;
-    margin-bottom: 0.5px;
+    color: var(--orange-600);
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
   }
+
+  &::-webkit-scrollbar { width: 0; }
 `;
 
 export const ModalPre = styled.div`
-  background-color: #fff8f0;
+  background: var(--orange-50);
   padding: 14px;
-  border-left: 4px solid #ffb74d;
+  border-left: 3px solid var(--orange-400);
   border-radius: 8px;
-  font-family: 'Courier New', monospace;
-  font-size: 0.88em;
+  font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
   overflow-x: auto;
   margin-top: 0.8rem;
+  color: var(--ink-900);
 `;
