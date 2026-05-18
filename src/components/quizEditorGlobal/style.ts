@@ -1,37 +1,45 @@
 import styled from 'styled-components';
 
 export const Wrapper = styled.div<{ $isDragOver?: boolean }>`
-  width: 100%;
-  border-radius: 10px;
-  border: 2px solid ${({ $isDragOver }) => ($isDragOver ? '#e65100' : '#ffb74a')};
-  transition: border 0.3s ease, box-shadow 0.3s ease;
-  background: #fff;
-  margin-bottom: 10px;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--paper);
+  border: none;
+  transition: box-shadow 0.2s;
 
   ${({ $isDragOver }) =>
     $isDragOver &&
-    `
-    background-color: #fffaf2;
-    box-shadow: 0 0 0 3px rgba(230, 81, 0, 0.16);
-  `}
+    `box-shadow: inset 0 0 0 3px var(--orange-300);`}
 
-  &:focus-within {
-    border-color: #df8468;
-    box-shadow: 0 0 8px #e65100;
+  /* @uiw/react-codemirror renders a wrapper div around .cm-editor */
+  & > div {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
   }
 
   .cm-editor {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 1rem;
-    min-height: 320px;
+    font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, monospace;
+    font-size: 13.5px;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
   }
 
   .cm-scroller {
-    min-height: 320px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto !important;
   }
 
   .cm-content {
-    padding: 10px 4px;
+    padding: 14px 4px;
+    min-height: 100%;
   }
 
   .cm-focused {
@@ -39,83 +47,65 @@ export const Wrapper = styled.div<{ $isDragOver?: boolean }>`
   }
 
   .cm-line {
-    padding: 0 4px;
+    padding: 0 6px;
+    line-height: 22px;
   }
 
   /* Bold WYSIWYG */
   .cm-bold-text { font-weight: 700; }
 
-  /* Syntax colors */
-  .ͼb { color: #e65100; font-weight: 700; }  /* keyword = question header */
-  .ͼc { color: #2e7d32; font-weight: 600; }  /* string = correct answer */
-  .ͼd { color: #1565c0; }                     /* variableName = option */
-  .ͼe { color: #6a1b9a; font-style: italic; } /* meta = image placeholder */
-  .ͼf { font-weight: 700; }                   /* emphasis = *bold* */
+  /* Syntax colours — mapped via quizLanguage.ts tags */
+  .ͼb { color: var(--syn-header); font-weight: 700; }   /* question header */
+  .ͼc { color: var(--syn-correct); font-weight: 600; }  /* correct answer marker */
+  .ͼd { color: var(--syn-option); }                     /* option letter */
+  .ͼe { color: var(--syn-image); font-style: italic; }  /* image placeholder */
+  .ͼf { font-weight: 700; }                             /* bold */
 `;
 
 export const ShortcutBar = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 6px 12px;
-  background: #fff8f0;
-  border-bottom: 1px solid #ffe0b2;
-  border-radius: 8px 8px 0 0;
-  font-size: 0.78rem;
-  color: #b46000;
-  flex-wrap: wrap;
-
-  kbd {
-    background: #fff;
-    border: 1px solid #ffcc80;
-    border-radius: 4px;
-    padding: 1px 5px;
-    font-size: 0.75rem;
-    font-family: monospace;
-    color: #e65100;
-  }
+  display: none; /* shortcuts now live in RightPane / BottomBar */
 `;
 
 export const BarSeparator = styled.span`
-  color: #e0c090;
+  color: var(--orange-200);
   user-select: none;
 `;
 
 export const BarButton = styled.button`
   background: none;
   border: none;
-  color: #b46000;
-  font-size: 0.78rem;
+  color: var(--ink-500);
+  font-size: 11.5px;
   padding: 2px 4px;
   cursor: pointer;
   border-radius: 4px;
   transition: background 0.15s, color 0.15s;
   white-space: nowrap;
+  font-family: inherit;
 
   kbd {
-    background: #fff;
-    border: 1px solid #ffcc80;
+    background: var(--paper-tint);
+    border: 1px solid var(--border-strong);
     border-radius: 4px;
     padding: 1px 5px;
-    font-size: 0.75rem;
-    font-family: monospace;
-    color: #e65100;
-    margin-right: 2px;
+    font-size: 10.5px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    color: var(--ink-700);
+    margin-right: 3px;
   }
 
   &:hover {
-    background: #ffe0b2;
-    color: #e65100;
+    background: var(--orange-50);
+    color: var(--orange-500);
   }
 `;
 
 export const BarBoldButton = styled.button`
   background: none;
-  border: 1px solid #ffcc80;
+  border: 1px solid var(--border-strong);
   border-radius: 4px;
-  color: #e65100;
-  font-size: 0.85rem;
+  color: var(--orange-500);
+  font-size: 13px;
   font-weight: 700;
   width: 24px;
   height: 22px;
@@ -126,21 +116,21 @@ export const BarBoldButton = styled.button`
   transition: background 0.15s;
   padding: 0;
 
-  &:hover { background: #ffe0b2; }
+  &:hover { background: var(--orange-50); }
 `;
 
 export const BarFileLabel = styled.label`
-  background: #fff3e0;
-  border: 1px solid #ffcc80;
-  border-radius: 6px;
-  color: #e65100;
-  font-size: 0.78rem;
+  background: var(--paper-tint);
+  border: 1px solid var(--border-strong);
+  border-radius: 5px;
+  color: var(--ink-700);
+  font-size: 11.5px;
   font-weight: 600;
-  padding: 3px 10px;
+  padding: 2px 9px;
   cursor: pointer;
   transition: background 0.15s;
   white-space: nowrap;
+  font-family: inherit;
 
-  &:hover { background: #ffe0b2; }
+  &:hover { background: var(--orange-50); color: var(--orange-600); }
 `;
-

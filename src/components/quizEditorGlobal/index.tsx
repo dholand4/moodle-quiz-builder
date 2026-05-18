@@ -9,12 +9,8 @@ import { imageInlinePlugin } from './imagePlugin';
 import { boldPlugin, htmlPasteExtension } from './boldPlugin';
 import * as S from './style';
 
-const QUESTION_TEMPLATE = `1. Enunciado da questão
-a) Alternativa A
-b) Alternativa B
-c) Alternativa C
-d) Alternativa D {correto}
-`;
+const makeTemplate = (n: number) =>
+  `${n}. Enunciado da questão\na) Alternativa A\nb) Alternativa B\nc) Alternativa C\nd) Alternativa D {correto}\n`;
 
 export interface QuizEditorHandle {
   getValue: () => string;
@@ -22,6 +18,11 @@ export interface QuizEditorHandle {
   insertAtCursor: (text: string) => void;
   focus: () => void;
   refreshDecorations: () => void;
+  triggerImageUpload: () => void;
+  insertTemplate: () => void;
+  openSearch: () => void;
+  wrapBold: () => void;
+  scrollToQuestion: (identifier: string) => void;
 }
 
 interface IQuizEditorProps {
@@ -47,13 +48,12 @@ const quizEditorGlobal = forwardRef<QuizEditorHandle, IQuizEditorProps>(
       onDragLeave,
       onDrop,
       onImageUpload,
-      onFileImport,
+      onFileImport: _onFileImport,
     },
     ref,
   ) => {
     const cmRef = useRef<ReactCodeMirrorRef>(null);
     const imageInputRef = useRef<HTMLInputElement>(null);
-    const fileImportRef = useRef<HTMLInputElement>(null);
 
     const getView = () => cmRef.current?.view ?? null;
 
@@ -73,6 +73,24 @@ const quizEditorGlobal = forwardRef<QuizEditorHandle, IQuizEditorProps>(
       },
       focus() { getView()?.focus(); },
       refreshDecorations() { getView()?.dispatch({}); },
+      triggerImageUpload() { imageInputRef.current?.click(); },
+      scrollToQuestion(identifier: string) {
+        const view = getView();
+        if (!view) return;
+        // identifier is "Q1", "Q2", … — extract the 1-based index
+        const num = parseInt(identifier.replace(/\D/g, ''), 10);
+        if (isNaN(num) || num < 1) return;
+        const text = view.state.doc.toString();
+        // find all question header positions (same regex as xmlParser)
+        const matches = [...text.matchAll(/^(?:quest[ãa]o\s*)?\d+\s*[.\-]?\s*/gim)];
+        const target = matches[num - 1];
+        if (!target || target.index === undefined) return;
+        view.dispatch({ effects: EditorView.scrollIntoView(target.index, { y: 'start', yMargin: 24 }) });
+        view.focus();
+      },
+      insertTemplate,
+      openSearch,
+      wrapBold,
     }));
 
     const insertTemplate = useCallback(() => {
@@ -80,8 +98,10 @@ const quizEditorGlobal = forwardRef<QuizEditorHandle, IQuizEditorProps>(
       if (!view) return true;
       const { from, to } = view.state.selection.main;
       const doc = view.state.doc.toString();
+      const nums = [...doc.matchAll(/^(\d+)\./gm)].map((m) => parseInt(m[1], 10));
+      const next = nums.length > 0 ? Math.max(...nums) + 1 : 1;
       const prefix = from > 0 && doc[from - 1] !== '\n' ? '\n\n' : '';
-      const insert = prefix + QUESTION_TEMPLATE;
+      const insert = prefix + makeTemplate(next);
       view.dispatch({ changes: { from, to, insert }, selection: { anchor: from + insert.length } });
       return true;
     }, []);
@@ -196,11 +216,11 @@ const quizEditorGlobal = forwardRef<QuizEditorHandle, IQuizEditorProps>(
           '&': { background: 'transparent' },
 
           // Gutter (line numbers)
-          '.cm-gutters': { background: '#fff8f0', borderRight: '1px solid #ffe0b2', color: '#c08040' },
-          '.cm-activeLineGutter': { background: '#fff3e0' },
-          '.cm-activeLine': { background: '#fff9f0' },
-          '.cm-selectionBackground': { background: '#ffe0b240 !important' },
-          '.cm-cursor': { borderLeftColor: '#e65100' },
+          '.cm-gutters': { background: 'var(--paper-tint)', borderRight: '1px solid var(--orange-100)', color: 'var(--ink-400)' },
+          '.cm-activeLineGutter': { background: 'var(--orange-50)' },
+          '.cm-activeLine': { background: 'rgba(0,163,187,0.03)' },
+          '.cm-selectionBackground': { background: 'rgba(0,163,187,0.12) !important' },
+          '.cm-cursor': { borderLeftColor: 'var(--orange-500)' },
 
           // Search panel container
           '.cm-search': {
@@ -209,37 +229,37 @@ const quizEditorGlobal = forwardRef<QuizEditorHandle, IQuizEditorProps>(
             flexWrap: 'wrap',
             gap: '6px',
             padding: '8px 12px',
-            background: '#fff8f0',
-            borderTop: '2px solid #ffb74a',
-            fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-            fontSize: '0.85rem',
+            background: 'var(--orange-50)',
+            borderTop: '1px solid var(--orange-200)',
+            fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+            fontSize: '12px',
           },
 
           // Text inputs (Find / Replace)
           '.cm-search .cm-textfield': {
-            border: '1px solid #ffcc80',
+            border: '1px solid var(--orange-200)',
             borderRadius: '6px',
             padding: '4px 10px',
-            fontSize: '0.85rem',
+            fontSize: '12px',
             fontFamily: 'inherit',
-            background: '#fff',
-            color: '#333',
+            background: 'var(--paper)',
+            color: 'var(--ink-900)',
             outline: 'none',
             width: '160px',
             transition: 'border 0.2s',
           },
           '.cm-search .cm-textfield:focus': {
-            borderColor: '#fb8c00',
-            boxShadow: '0 0 0 2px rgba(251,140,0,0.15)',
+            borderColor: 'var(--orange-400)',
+            boxShadow: '0 0 0 2px rgba(0,163,187,0.12)',
           },
 
           // All buttons
           '.cm-search button': {
-            background: '#fff3e0',
-            border: '1px solid #ffcc80',
+            background: 'var(--paper)',
+            border: '1px solid var(--orange-200)',
             borderRadius: '6px',
-            color: '#e65100',
-            fontSize: '0.8rem',
+            color: 'var(--orange-600)',
+            fontSize: '11.5px',
             fontWeight: '600',
             padding: '4px 10px',
             cursor: 'pointer',
@@ -247,31 +267,31 @@ const quizEditorGlobal = forwardRef<QuizEditorHandle, IQuizEditorProps>(
             transition: 'background 0.15s',
             whiteSpace: 'nowrap',
           },
-          '.cm-search button:hover': { background: '#ffe0b2' },
+          '.cm-search button:hover': { background: 'var(--orange-100)' },
 
           // Close (×) button — make it subtle
           '.cm-search button[name=close]': {
             background: 'none',
             border: 'none',
-            color: '#bbb',
+            color: 'var(--ink-400)',
             fontSize: '1rem',
             padding: '2px 6px',
             marginLeft: 'auto',
           },
-          '.cm-search button[name=close]:hover': { color: '#e65100', background: 'none' },
+          '.cm-search button[name=close]:hover': { color: 'var(--orange-500)', background: 'none' },
 
           // Checkbox labels (match case / regexp / by word)
           '.cm-search label': {
             display: 'flex',
             alignItems: 'center',
             gap: '4px',
-            fontSize: '0.8rem',
-            color: '#b46000',
+            fontSize: '11.5px',
+            color: 'var(--ink-500)',
             cursor: 'pointer',
             userSelect: 'none',
           },
           '.cm-search input[type=checkbox]': {
-            accentColor: '#e65100',
+            accentColor: 'var(--orange-500)',
             cursor: 'pointer',
           },
         }),
@@ -287,73 +307,21 @@ const quizEditorGlobal = forwardRef<QuizEditorHandle, IQuizEditorProps>(
 
     return (
       <S.Wrapper $isDragOver={isDragOver} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
-        <S.ShortcutBar>
-          {/* Clickable shortcuts */}
-          <S.BarButton onClick={insertTemplate} title="Inserir modelo de questão (Ctrl+Q)">
-            <kbd>Ctrl+Q</kbd> novo modelo
-          </S.BarButton>
-
-          <S.BarSeparator>·</S.BarSeparator>
-
-          <S.BarButton onClick={openSearch} title="Buscar (Ctrl+F)">
-            <kbd>Ctrl+F</kbd> buscar
-          </S.BarButton>
-
-          <S.BarSeparator>·</S.BarSeparator>
-
-          <S.BarButton onClick={openSearch} title="Buscar e substituir (Ctrl+H)">
-            <kbd>Ctrl+H</kbd> substituir
-          </S.BarButton>
-
-          <S.BarSeparator>·</S.BarSeparator>
-
-          <S.BarBoldButton onClick={wrapBold} title="Negrito (Ctrl+B)">
-            <b>N</b>
-          </S.BarBoldButton>
-
-          <S.BarSeparator>·</S.BarSeparator>
-
-          {/* Importar PDF / .docx */}
-          {onFileImport && (
-            <>
-              <S.BarFileLabel htmlFor="bar-file-import" title="Importar PDF ou Word">
-                📄 Importar PDF / .docx
-              </S.BarFileLabel>
-              <input
-                ref={fileImportRef}
-                id="bar-file-import"
-                type="file"
-                accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                multiple
-                style={{ display: 'none' }}
-                onChange={onFileImport}
-              />
-            </>
-          )}
-
-          {/* Inserir imagem */}
-          {onImageUpload && (
-            <>
-              <S.BarFileLabel htmlFor="bar-image-upload" title="Inserir imagem no cursor">
-                📎 Inserir imagem
-              </S.BarFileLabel>
-              <input
-                ref={imageInputRef}
-                id="bar-image-upload"
-                type="file"
-                accept="image/*"
-                style={{ display: 'none' }}
-                onChange={handleImageFileChange}
-              />
-            </>
-          )}
-        </S.ShortcutBar>
+        {/* Hidden image input — parent triggers via onImageUpload */}
+        <input
+          ref={imageInputRef}
+          id="bar-image-upload"
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={handleImageFileChange}
+        />
 
         <CodeMirror
           ref={cmRef}
           value={defaultValue}
           extensions={extensions}
-          onChange={(_val: string, update: ViewUpdate) => onChange?.(_val, update)}
+          onChange={(_val: string, _update: ViewUpdate) => onChange?.(_val)}
           basicSetup={false}
           placeholder="Digite ou cole suas questões aqui... Você pode colar imagens diretamente no texto!"
         />
