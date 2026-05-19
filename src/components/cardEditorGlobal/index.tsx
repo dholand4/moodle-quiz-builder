@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from 'react';
 import { IQuestionCard, ICardOption } from './types';
 import { Question } from '../../pages/Home/xmlParser';
 import * as S from './style';
@@ -47,57 +48,91 @@ export function cardsToText(cards: IQuestionCard[]): string {
     .join('\n\n');
 }
 
+/* Auto-grow textarea — grows with content on every render */
+function AutoGrow({ value, onChange, placeholder, className }: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  className?: string;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  });
+  return (
+    <S.TextArea
+      ref={ref}
+      className={className}
+      value={value}
+      placeholder={placeholder}
+      rows={1}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  );
+}
+
+function AutoGrowOption({ value, onChange, placeholder }: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  });
+  return (
+    <S.OptionTextArea
+      ref={ref}
+      value={value}
+      placeholder={placeholder}
+      rows={1}
+      onChange={(e) => onChange(e.target.value)}
+      onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
+    />
+  );
+}
+
 interface ICardEditorProps {
   cards: IQuestionCard[];
   onChange: (cards: IQuestionCard[]) => void;
 }
 
 export default function CardEditor({ cards, onChange }: ICardEditorProps) {
-  const updateCard = (id: string, patch: Partial<IQuestionCard>) => {
+  const updateCard = (id: string, patch: Partial<IQuestionCard>) =>
     onChange(cards.map((c) => (c.id === id ? { ...c, ...patch } : c)));
-  };
 
-  const removeCard = (id: string) => {
+  const removeCard = (id: string) =>
     onChange(cards.filter((c) => c.id !== id));
-  };
 
-  const updateOption = (cardId: string, optId: string, patch: Partial<ICardOption>) => {
-    onChange(
-      cards.map((c) => {
-        if (c.id !== cardId) return c;
-        return { ...c, options: c.options.map((o) => (o.id === optId ? { ...o, ...patch } : o)) };
-      }),
-    );
-  };
+  const updateOption = (cardId: string, optId: string, patch: Partial<ICardOption>) =>
+    onChange(cards.map((c) => {
+      if (c.id !== cardId) return c;
+      return { ...c, options: c.options.map((o) => (o.id === optId ? { ...o, ...patch } : o)) };
+    }));
 
-  const setCorrect = (cardId: string, optId: string) => {
-    onChange(
-      cards.map((c) => {
-        if (c.id !== cardId) return c;
-        return { ...c, options: c.options.map((o) => ({ ...o, isCorrect: o.id === optId })) };
-      }),
-    );
-  };
+  const setCorrect = (cardId: string, optId: string) =>
+    onChange(cards.map((c) => {
+      if (c.id !== cardId) return c;
+      return { ...c, options: c.options.map((o) => ({ ...o, isCorrect: o.id === optId })) };
+    }));
 
-  const addOption = (cardId: string) => {
-    onChange(
-      cards.map((c) => {
-        if (c.id !== cardId) return c;
-        if (c.options.length >= 8) return c;
-        return { ...c, options: [...c.options, makeOption()] };
-      }),
-    );
-  };
+  const addOption = (cardId: string) =>
+    onChange(cards.map((c) => {
+      if (c.id !== cardId || c.options.length >= 8) return c;
+      return { ...c, options: [...c.options, makeOption()] };
+    }));
 
-  const removeOption = (cardId: string, optId: string) => {
-    onChange(
-      cards.map((c) => {
-        if (c.id !== cardId) return c;
-        if (c.options.length <= 2) return c;
-        return { ...c, options: c.options.filter((o) => o.id !== optId) };
-      }),
-    );
-  };
+  const removeOption = (cardId: string, optId: string) =>
+    onChange(cards.map((c) => {
+      if (c.id !== cardId || c.options.length <= 2) return c;
+      return { ...c, options: c.options.filter((o) => o.id !== optId) };
+    }));
 
   return (
     <S.Container>
@@ -105,24 +140,26 @@ export default function CardEditor({ cards, onChange }: ICardEditorProps) {
         {cards.map((card, cardIndex) => {
           const hasCorrect = card.options.some((o) => o.isCorrect);
           const hasContent = card.options.some((o) => o.text.trim());
-          const hasError = hasContent && !hasCorrect;
+          const hasError   = hasContent && !hasCorrect;
+          const isOk       = hasContent && hasCorrect;
 
           return (
-            <S.Card key={card.id} $hasError={hasError}>
+            <S.Card key={card.id} $hasError={hasError} $isOk={isOk}>
               <S.CardHeader $hasError={hasError}>
-                <S.CardLabel $hasError={hasError}>Q{String(cardIndex + 1).padStart(2, '0')}</S.CardLabel>
+                <S.CardLabel $hasError={hasError} $isOk={isOk}>
+                  Q{String(cardIndex + 1).padStart(2, '0')}
+                </S.CardLabel>
                 {hasError && <S.ErrorBadge>⚠ sem gabarito</S.ErrorBadge>}
-                <S.RemoveCardBtn onClick={() => removeCard(card.id)} title="Remover questão">
-                  ✕
-                </S.RemoveCardBtn>
+                <S.RemoveCardBtn onClick={() => removeCard(card.id)} title="Remover questão">✕</S.RemoveCardBtn>
               </S.CardHeader>
 
-              <S.TextArea
-                placeholder="Enunciado da questão..."
+              <AutoGrow
                 value={card.questionText}
-                rows={2}
-                onChange={(e) => updateCard(card.id, { questionText: e.target.value })}
+                placeholder="Enunciado da questão..."
+                onChange={(v) => updateCard(card.id, { questionText: v })}
               />
+
+              <S.OptionsDivider />
 
               <S.OptionsSection>
                 {card.options.map((opt, optIndex) => (
@@ -134,25 +171,23 @@ export default function CardEditor({ cards, onChange }: ICardEditorProps) {
                       onChange={() => setCorrect(card.id, opt.id)}
                       title="Marcar como correta"
                     />
-                    <S.OptionLetter>{LETTERS[optIndex] ?? optIndex + 1})</S.OptionLetter>
-                    <S.OptionInput
-                      placeholder={`Alternativa ${(LETTERS[optIndex] ?? '').toUpperCase() || optIndex + 1}…`}
+                    <S.OptionLetter $correct={opt.isCorrect}>
+                      {LETTERS[optIndex] ?? optIndex + 1})
+                    </S.OptionLetter>
+                    <AutoGrowOption
                       value={opt.text}
-                      onChange={(e) => updateOption(card.id, opt.id, { text: e.target.value })}
+                      placeholder={`Alternativa ${(LETTERS[optIndex] ?? '').toUpperCase() || optIndex + 1}…`}
+                      onChange={(v) => updateOption(card.id, opt.id, { text: v })}
                     />
                     <S.RemoveOptBtn
                       onClick={() => removeOption(card.id, opt.id)}
                       title="Remover alternativa"
-                    >
-                      ✕
-                    </S.RemoveOptBtn>
+                    >✕</S.RemoveOptBtn>
                   </S.OptionRow>
                 ))}
 
                 {card.options.length < 8 && (
-                  <S.AddOptionBtn onClick={() => addOption(card.id)}>
-                    + alternativa
-                  </S.AddOptionBtn>
+                  <S.AddOptionBtn onClick={() => addOption(card.id)}>+ alternativa</S.AddOptionBtn>
                 )}
               </S.OptionsSection>
             </S.Card>
