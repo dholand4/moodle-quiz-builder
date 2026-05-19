@@ -54,6 +54,10 @@ export const Wrapper = styled.div<{ $isDragOver?: boolean }>`
   /* Bold WYSIWYG */
   .cm-bold-text { font-weight: 700; }
 
+  /* Alignment WYSIWYG */
+  .cm-centered-line  { text-align: center; }
+  .cm-justified-line { text-align: justify; }
+
   /* Syntax colours — mapped via quizLanguage.ts tags */
   .ͼb { color: var(--syn-header); font-weight: 700; }   /* question header */
   .ͼc { color: var(--syn-correct); font-weight: 600; }  /* correct answer marker */

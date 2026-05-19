@@ -7,6 +7,7 @@ import { search, openSearchPanel } from '@codemirror/search';
 import { quizLanguage } from './quizLanguage';
 import { imageInlinePlugin } from './imagePlugin';
 import { boldPlugin, htmlPasteExtension } from './boldPlugin';
+import { centerPlugin } from './centerPlugin';
 import * as S from './style';
 
 const makeTemplate = (n: number) =>
@@ -22,6 +23,7 @@ export interface QuizEditorHandle {
   insertTemplate: () => void;
   openSearch: () => void;
   wrapBold: () => void;
+  setAlignment: (type: 'center' | 'justify' | 'none') => void;
   scrollToQuestion: (identifier: string) => void;
 }
 
@@ -91,6 +93,7 @@ const quizEditorGlobal = forwardRef<QuizEditorHandle, IQuizEditorProps>(
       insertTemplate,
       openSearch,
       wrapBold,
+      setAlignment,
     }));
 
     const insertTemplate = useCallback(() => {
@@ -173,6 +176,32 @@ const quizEditorGlobal = forwardRef<QuizEditorHandle, IQuizEditorProps>(
       return true;
     }, []);
 
+    const setAlignment = useCallback((type: 'center' | 'justify' | 'none') => {
+      const view = getView();
+      if (!view) return;
+      const { from, to } = view.state.selection.main;
+      const doc = view.state.doc;
+      const startLine = doc.lineAt(from);
+      const endLine   = doc.lineAt(to);
+      const tag = type === 'center' ? '{c} ' : type === 'justify' ? '{j} ' : '';
+      const changes: { from: number; to?: number; insert: string }[] = [];
+      for (let n = startLine.number; n <= endLine.number; n++) {
+        const line = doc.line(n);
+        if (!line.text.trim()) continue;
+        const existing = /^\{[cj]\}\s*/i.exec(line.text);
+        if (existing) {
+          // remove existing tag
+          changes.push({ from: line.from, to: line.from + existing[0].length, insert: '' });
+        }
+        if (tag) {
+          // add new tag (after removing old one, so insert at line.from)
+          changes.push({ from: line.from, insert: tag });
+        }
+      }
+      if (changes.length) view.dispatch({ changes });
+      view.focus();
+    }, []);
+
     const getImageMap = useCallback(() => imageMapRef?.current ?? {}, [imageMapRef]);
 
     const extensions = useMemo(
@@ -181,6 +210,7 @@ const quizEditorGlobal = forwardRef<QuizEditorHandle, IQuizEditorProps>(
         quizLanguage,
         imageInlinePlugin(getImageMap),
         boldPlugin(),
+        centerPlugin(),
         htmlPasteExtension(),
         search({ top: true }),
         EditorState.phrases.of({
@@ -209,6 +239,7 @@ const quizEditorGlobal = forwardRef<QuizEditorHandle, IQuizEditorProps>(
           indentWithTab,
           { key: 'Ctrl-q', run: insertTemplate },
           { key: 'Ctrl-b', run: wrapBold },
+          { key: 'Ctrl-e', run: () => { setAlignment('center'); return true; } },
           { key: 'Ctrl-f', run: openSearch },
           { key: 'Ctrl-h', run: openSearch },
         ]),
@@ -296,7 +327,7 @@ const quizEditorGlobal = forwardRef<QuizEditorHandle, IQuizEditorProps>(
           },
         }),
       ],
-      [getImageMap, insertTemplate, wrapBold, openSearch],
+      [getImageMap, insertTemplate, wrapBold, setAlignment, openSearch],
     );
 
     const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
