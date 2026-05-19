@@ -22,7 +22,7 @@ interface RightPaneProps {
 
 const DEFAULT_TAB: Record<EditorMode, Tab> = {
   text: 'preview',
-  card: 'shortcuts',
+  card: 'preview',
 };
 
 /* ── Shell ────────────────────────────────────────────── */
@@ -123,9 +123,14 @@ const ErrorTag = styled.span`
 
 const PreviewQText = styled.div`
   font-size: 13px;
-  font-weight: 600;
-  line-height: 1.4;
+  font-weight: 400;
+  line-height: 1.5;
   color: var(--ink-900);
+
+  p {
+    margin: 0 0 6px;
+    &:last-child { margin-bottom: 0; }
+  }
 
   img {
     max-width: 100%;
