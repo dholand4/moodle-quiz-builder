@@ -132,11 +132,31 @@ const escapeXML = (str: string): string =>
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&apos;');
 
-const formatInlineText = (text: string): string => {
-    const escaped = escapeXML(text);
+const formatInlineLine = (raw: string): string => {
+    const escaped = escapeXML(raw);
     return escaped
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.*?)\*/g, '<strong>$1</strong>')
         .replace(/_(.*?)_/g, '<em>$1</em>');
+};
+
+const ALIGN_TAG_RE = /^\{([cj])\}\s*/i;
+
+const ALIGN_STYLE: Record<string, string> = {
+    c: 'text-align:center;',
+    j: 'text-align:justify;',
+};
+
+const formatInlineText = (text: string): string => {
+    return text.split('\n').map((line) => {
+        if (!line.trim()) return '';
+        const m = ALIGN_TAG_RE.exec(line);
+        const tag = m ? m[1].toLowerCase() : null;
+        const clean = m ? line.slice(m[0].length) : line;
+        const html = formatInlineLine(clean);
+        const style = tag ? ` style="${ALIGN_STYLE[tag]}"` : '';
+        return `<p${style}>${html}</p>`;
+    }).filter(Boolean).join('');
 };
 
 export function parseTextToQuestions(inputText: string): Question[] {
@@ -161,7 +181,7 @@ export function parseTextToQuestions(inputText: string): Question[] {
                 questionText: formattedText,
                 options: currentQuestion.options.map(opt => ({
                     ...opt,
-                    text: formatInlineText(opt.text)
+                    text: formatInlineLine(opt.text)
                 })),
                 correctAnswer: currentQuestion.correctAnswer || '',
             });
@@ -173,14 +193,20 @@ export function parseTextToQuestions(inputText: string): Question[] {
         const trimmedLine = line.trim();
         if (!trimmedLine) continue;
 
-        const isHeader = headerRegex.test(trimmedLine);
-        const optionMatch = trimmedLine.match(optionRegex);
+        // Strip {c}/{j} prefix before structural matching — keep it for body text
+        const centerMatch = /^\{[cj]\}\s*/i.exec(trimmedLine);
+        const structLine = centerMatch ? trimmedLine.slice(centerMatch[0].length) : trimmedLine;
+
+        const isHeader = headerRegex.test(structLine);
+        const optionMatch = structLine.match(optionRegex);
 
         if (isHeader) {
             finalizeQuestion();
 
             questionCounter++;
-            const questionBody = trimmedLine.replace(headerRegex, '').trim();
+            const bodyText = structLine.replace(headerRegex, '').trim();
+            // Preserve {c} on the question body text if the whole line was centered
+            const questionBody = centerMatch ? `${centerMatch[0]}${bodyText}` : bodyText;
 
             currentQuestion = {
                 identifier: `Q${questionCounter}`,
@@ -192,7 +218,7 @@ export function parseTextToQuestions(inputText: string): Question[] {
             if (!currentQuestion.textBuffer) continue;
 
             const letter = optionMatch[1].toLowerCase();
-            let text = trimmedLine.replace(optionRegex, '').trim();
+            let text = structLine.replace(optionRegex, '').trim();
 
             if (/\{\s*(correto|correta)\s*\}/i.test(text)) {
                 currentQuestion.correctAnswer = letter;
@@ -202,6 +228,7 @@ export function parseTextToQuestions(inputText: string): Question[] {
             currentQuestion.options?.push({ letter, text });
 
         } else if (currentQuestion.textBuffer) {
+            // Body text: keep original (with {c} if present) so formatInlineText handles centering
             currentQuestion.textBuffer.push(trimmedLine);
         }
     }
@@ -214,11 +241,10 @@ export function parseTextToQuestions(inputText: string): Question[] {
 export function generateMoodleXML(questions: Question[], shuffle: boolean): string {
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<quiz>\n';
     questions.forEach((question, index) => {
-        const questionTextWithBreaks = question.questionText.replace(/\n/g, '<br>');
         xml += `  <question type="multichoice">\n`;
         xml += `    <name><text>${question.identifier || `Q${index + 1}`}</text></name>\n`;
         xml += `    <questiontext format="html">\n`;
-        xml += `      <text><![CDATA[<p>${questionTextWithBreaks}</p>]]></text>\n`;
+        xml += `      <text><![CDATA[${question.questionText}]]></text>\n`;
         xml += `    </questiontext>\n`;
         xml += `    <shuffleanswers>${shuffle ? '1' : '0'}</shuffleanswers>\n`;
         question.options.forEach(option => {
