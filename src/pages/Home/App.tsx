@@ -186,6 +186,29 @@ const ToolbarGhost = styled.button`
 `;
 
 
+const AlignGroup = styled.div`
+  display: inline-flex;
+  border: 1px solid var(--orange-200);
+  border-radius: 6px;
+  overflow: hidden;
+`;
+
+const AlignBtn = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--orange-200);
+  color: var(--ink-700);
+  cursor: pointer;
+  transition: background 0.15s;
+  &:last-child { border-right: none; }
+  &:hover { background: var(--orange-50); color: var(--orange-500); }
+`;
+
 /* ── Card mode header ─────────────────────────────────── */
 const CardToolbar = styled.div`
   display: flex;
@@ -561,6 +584,17 @@ export default function App() {
                   <ToolbarGhost onClick={() => editorRef.current?.wrapBold()} title="Negrito (Ctrl+B)" style={{ fontWeight: 700 }}>
                     <b>N</b>
                   </ToolbarGhost>
+                  <AlignGroup>
+                    <AlignBtn onClick={() => editorRef.current?.setAlignment('none')} title="Alinhar à esquerda">
+                      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1 2h11M1 5h7M1 8h11M1 11h7" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
+                    </AlignBtn>
+                    <AlignBtn onClick={() => editorRef.current?.setAlignment('center')} title="Centralizar (Ctrl+E)">
+                      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1 2h11M3 5h7M1 8h11M3 11h7" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
+                    </AlignBtn>
+                    <AlignBtn onClick={() => editorRef.current?.setAlignment('justify')} title="Justificar">
+                      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1 2h11M1 5h11M1 8h11M1 11h11" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
+                    </AlignBtn>
+                  </AlignGroup>
                   <ToolbarGhost onClick={() => editorRef.current?.triggerImageUpload()} title="Inserir imagem">
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                       <rect x="0.5" y="0.5" width="11" height="11" rx="2" stroke="currentColor" strokeWidth="1.2"/>
