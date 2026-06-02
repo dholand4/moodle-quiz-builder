@@ -1,0 +1,78 @@
+/* ─── Design tokens — Moodle Quiz Builder ─── */
+:root {
+  /* cyan brand (extraído da logo) */
+  --orange-700: #006878;
+  --orange-600: #008599;
+  --orange-500: #00A3BB;   /* primary */
+  --orange-400: #1EC0D4;
+  --orange-300: #55D5E2;
+  --orange-200: #A0E8F0;
+  --orange-100: #C6F2F7;
+  --orange-50:  #E5F8FB;
+
+  /* surface stack — cream neutro da logo */
+  --bg:         #EDF7F9;
+  --bg-2:       #F4FAFB;
+  --paper:      #FFFFFF;
+  --paper-tint: #F8FDFE;
+  --yellow:     #FFD978;
+  --yellow-soft:#FCEAB8;
+
+  /* neutrals */
+  --ink-900:   #0D1F24;
+  --ink-700:   #2E4F58;
+  --ink-500:   #617D87;
+  --ink-400:   #8FADB6;
+  --ink-200:   #CCDDE2;
+  --border:    #C6EDF2;
+  --border-strong: #A0D8E0;
+
+  /* status */
+  --success:    #1F8A5B;
+  --success-bg: #E7F4ED;
+  --danger:     #C7402E;
+  --danger-bg:  #FBE9E5;
+  --warning:    #B8721E;
+  --warning-bg: #FDF1DC;
+
+  /* editor syntax */
+  --syn-header: #00A3BB;
+  --syn-correct:#1F8A5B;
+  --syn-option: #2D6FB0;
+  --syn-image:  #7A4FB5;
+}
+
+*, *::before, *::after {
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink-900);
+}
+
+.mono {
+  font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, monospace;
+}
+
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10.5px;
+  font-weight: 500;
+  padding: 2px 6px;
+  border: 1px solid var(--border-strong);
+  background: var(--paper-tint);
+  color: var(--ink-700);
+  border-radius: 5px;
+  line-height: 1;
+}
