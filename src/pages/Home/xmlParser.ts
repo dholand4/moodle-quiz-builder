@@ -67,12 +67,22 @@ export function normalizeExtractedText(inputText: string): string {
             continue;
         }
 
-        // Strip **bold** markers that the HTML paste handler adds to structural prefixes.
-        // If the full option line is bold, tag it as correct (bold = gabarito from Word/PDF).
+        // unwrapBoldPrefix handles two cases:
+        //  - Bold prefix only (**1.** text, **A)** text): always strip → use `unwrapped`
+        //  - Fully bold line (**entire line**):
+        //      • If it's an option → strip bold + add {correta} (bold = gabarito)
+        //      • Otherwise (body text like **Referência**) → keep original bold formatting
         const { line: unwrapped, wasFullyBold } = unwrapBoldPrefix(rawLine);
-        const line = (wasFullyBold && optionRegex.test(unwrapped) && !/\{\s*(correto|correta)\s*\}/i.test(unwrapped))
-            ? unwrapped + ' {correta}'
-            : unwrapped;
+        let line: string;
+        if (wasFullyBold && optionRegex.test(unwrapped)) {
+            line = /\{\s*(correto|correta)\s*\}/i.test(unwrapped)
+                ? unwrapped
+                : unwrapped + ' {correta}';
+        } else if (wasFullyBold) {
+            line = rawLine; // body text that is fully bold → preserve **...** for Moodle output
+        } else {
+            line = unwrapped; // bold prefix stripped (structural marker)
+        }
 
         const isHeader = headerRegex.test(line);
         const isOption = optionRegex.test(line);
