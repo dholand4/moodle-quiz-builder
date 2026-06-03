@@ -376,21 +376,46 @@ export default function App() {
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await getDocument({ data: arrayBuffer }).promise;
     const lines: string[] = [];
+    const optionRegex = /^([a-hA-H])[.)]\s+/;
+
     for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
       const page = await pdf.getPage(pageNumber);
       const textContent = await page.getTextContent();
+      type PdfItem = { str?: string; hasEOL?: boolean; fontName?: string };
+      const items = textContent.items as PdfItem[];
+
       let currentLine = '';
-      for (const item of textContent.items as { str?: string; hasEOL?: boolean }[]) {
+      let lineAllBold = true;
+      let lineHasText = false;
+
+      const flushLine = () => {
+        const trimmed = currentLine.trim();
+        if (!trimmed) return;
+        if (lineHasText && lineAllBold && optionRegex.test(trimmed)) {
+          lines.push(trimmed + ' {correta}');
+        } else {
+          lines.push(trimmed);
+        }
+      };
+
+      for (const item of items) {
         const text = item.str ?? '';
+        const isBold = /bold/i.test(item.fontName ?? '');
+        if (text.trim()) {
+          if (!lineHasText) { lineAllBold = isBold; lineHasText = true; }
+          else if (!isBold) lineAllBold = false;
+        }
         currentLine += text;
         if (item.hasEOL) {
-          if (currentLine.trim()) lines.push(currentLine.trim());
+          flushLine();
           currentLine = '';
+          lineAllBold = true;
+          lineHasText = false;
         } else {
           currentLine += ' ';
         }
       }
-      if (currentLine.trim()) lines.push(currentLine.trim());
+      flushLine();
       if (pageNumber < pdf.numPages) lines.push('');
     }
     return lines.join('\n').trim();

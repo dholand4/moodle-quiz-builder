@@ -77,8 +77,8 @@ function nodeToText(node: Node): string {
       if (fw === 'bold' || fw === '700') return `**${inner}**`;
     }
     if (tag === 'br') return '\n';
-    if (tag === 'p' || tag === 'div') return inner + '\n';
-    if (tag === 'li') return inner + '\n';
+    if (tag === 'p' || tag === 'div') return inner + '\n\n';
+    if (tag === 'li') return inner + '\n\n';
     return inner;
   }
   return '';
