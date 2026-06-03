@@ -20,7 +20,6 @@
 ## Índice
 
 - [Sobre](#-sobre)
-- [Preview](#-preview)
 - [Funcionalidades](#-funcionalidades)
 - [Tecnologias](#-tecnologias)
 - [Como rodar](#-como-rodar)
@@ -34,10 +33,6 @@ Cadastrar questionários diretamente no Moodle é um processo lento e repetitivo
 ---
 
 ## Preview
-
-<div align="center">
-  <img src="https://i.imgur.com/CDWHaTy.png" alt="Preview do Converter XML" width="1122" />
-</div>
 
 ---
 
