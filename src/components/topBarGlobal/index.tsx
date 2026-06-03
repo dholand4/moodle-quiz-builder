@@ -268,7 +268,7 @@ export default function TopBar({ activeMode, onModeChange, onImport, onGenerateX
         <InfoBtn onClick={onInfo} title="Ajuda e instruções">ⓘ</InfoBtn>
         <GhostBtn onClick={onImport} title="Importar PDF ou Word (.docx)">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M7 1v8M4 6l3 3 3-3M2 10v1a1 1 0 001 1h8a1 1 0 001-1v-1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M7 1v8M4 6l3 3 3-3M2 10v1a1 1 0 001 1h8a1 1 0 001-1v-1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           Importar
         </GhostBtn>
@@ -279,13 +279,13 @@ export default function TopBar({ activeMode, onModeChange, onImport, onGenerateX
         </ShuffleLabel>
         <CtaBtn $ghost onClick={onGeneratePDF} title="Baixar PDF">
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-            <path d="M6.5 1v7M4 6l2.5 2.5L9 6M1.5 10v1a1 1 0 001 1h9a1 1 0 001-1v-1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M6.5 1v7M4 6l2.5 2.5L9 6M1.5 10v1a1 1 0 001 1h9a1 1 0 001-1v-1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           PDF
         </CtaBtn>
         <CtaBtn onClick={onGenerateXML} title="Baixar XML">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2 5h10M2 9h10M5 2l-3 5 3 5M9 2l3 5-3 5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M2 5h10M2 9h10M5 2l-3 5 3 5M9 2l3 5-3 5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           XML
         </CtaBtn>
