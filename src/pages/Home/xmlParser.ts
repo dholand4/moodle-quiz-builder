@@ -129,6 +129,13 @@ export function normalizeExtractedText(inputText: string): string {
             continue;
         }
 
+        // "Alternativa correta: B" inline — always its own line, never merged
+        if (/^alternativa\s+correta\s*:/i.test(line)) {
+            normalized.push(line);
+            hadBlankLine = false;
+            continue;
+        }
+
         if (hasRomanMarkers) {
             const { lead, items } = splitByRomanMarkers(line);
             if (lead) {
@@ -250,6 +257,7 @@ export function parseTextToQuestions(inputText: string): Question[] {
 
     const headerRegex = /^(?:quest[ãa]o\s*)?\d+\s*[.-]?\s*/i;
     const optionRegex = /^([a-hA-H])[.)]\s+/;
+    const inlineCorrectRegex = /^alternativa\s+correta\s*:\s*([a-eA-E])/i;
 
     const finalizeQuestion = () => {
         if (currentQuestion.textBuffer && currentQuestion.options && currentQuestion.options.length > 0) {
@@ -327,6 +335,9 @@ export function parseTextToQuestions(inputText: string): Question[] {
             currentQuestion.options?.push({ letter, text });
             lastToken = 'option';
 
+        } else if (inlineCorrectRegex.test(structLine) && currentQuestion.textBuffer) {
+            const m = inlineCorrectRegex.exec(structLine)!;
+            currentQuestion.correctAnswer = m[1].toLowerCase();
         } else if (feedbackRegex.test(structLine) && currentQuestion.textBuffer) {
             currentQuestion.feedback = structLine.replace(feedbackRegex, '').trim();
             lastToken = 'body';
