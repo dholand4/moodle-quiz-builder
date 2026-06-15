@@ -259,7 +259,7 @@ export default function App() {
 
   /* editor change */
   const handleEditorChange = useCallback((value: string) => {
-    const normalized = value.replace(/\s*\|\s*/g, '\n');
+    const normalized = value.replace(/\s*\|\s*/g, '\n\n');
     if (normalized !== value) {
       editorRef.current?.setValue(normalized);
       setEditorContent(normalized);
