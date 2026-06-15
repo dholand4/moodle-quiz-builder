@@ -5,13 +5,19 @@ import * as S from './style';
 
 const LETTERS = 'abcdefgh';
 
+function generateId(): string {
+  return Array.from(crypto.getRandomValues(new Uint8Array(16)))
+    .map((b, i) => ([4, 6, 8, 10].includes(i) ? '-' : '') + b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 function makeOption(overrides: Partial<ICardOption> = {}): ICardOption {
-  return { id: crypto.randomUUID(), text: '', isCorrect: false, ...overrides };
+  return { id: generateId(), text: '', isCorrect: false, ...overrides };
 }
 
 export function makeCard(): IQuestionCard {
   return {
-    id: crypto.randomUUID(),
+    id: generateId(),
     questionText: '',
     options: [makeOption(), makeOption(), makeOption(), makeOption()],
     feedback: '',
@@ -21,11 +27,11 @@ export function makeCard(): IQuestionCard {
 export function textToCards(questions: Question[]): IQuestionCard[] {
   if (questions.length === 0) return [makeCard()];
   return questions.map((q) => ({
-    id: crypto.randomUUID(),
+    id: generateId(),
     questionText: q.questionText.replace(/<[^>]+>/g, '').trim(),
     options: q.options.length > 0
       ? q.options.map((opt) => ({
-          id: crypto.randomUUID(),
+          id: generateId(),
           text: opt.text,
           isCorrect: opt.letter === q.correctAnswer,
         }))
