@@ -259,10 +259,19 @@ export default function App() {
 
   /* editor change */
   const handleEditorChange = useCallback((value: string) => {
-    setEditorContent(value);
-    updateStats(value);
-    setPreviewQuestions(parseTextToQuestions(value));
-    setHasContent(value.trim().length > 0);
+    const normalized = value.replace(/\s*\|\s*/g, '\n');
+    if (normalized !== value) {
+      editorRef.current?.setValue(normalized);
+      setEditorContent(normalized);
+      updateStats(normalized);
+      setPreviewQuestions(parseTextToQuestions(normalized));
+      setHasContent(normalized.trim().length > 0);
+    } else {
+      setEditorContent(value);
+      updateStats(value);
+      setPreviewQuestions(parseTextToQuestions(value));
+      setHasContent(value.trim().length > 0);
+    }
   }, [updateStats]);
 
   /* mode switch */

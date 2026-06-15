@@ -28,7 +28,12 @@ export function textToCards(questions: Question[]): IQuestionCard[] {
   if (questions.length === 0) return [makeCard()];
   return questions.map((q) => ({
     id: generateId(),
-    questionText: q.questionText.replace(/<[^>]+>/g, '').trim(),
+    questionText: q.questionText
+      .replace(/<\/p>/gi, '\n')
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<[^>]+>/g, '')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim(),
     options: q.options.length > 0
       ? q.options.map((opt) => ({
           id: generateId(),
