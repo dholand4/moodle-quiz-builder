@@ -26,7 +26,7 @@ export function normalizeExtractedText(inputText: string): string {
     if (!inputText) return '';
 
     // Pipe ( | ) usado como separador de parágrafo em entradas de linha única
-    const withLineBreaks = inputText.replace(/\s*\|\s*/g, '\n');
+    const withLineBreaks = inputText.replace(/\s*\|\s*/g, '\n\n');
 
     const rawLines = withLineBreaks
         .split(/\r?\n/)
@@ -218,7 +218,7 @@ export function parseTextToQuestions(inputText: string): Question[] {
     if (!inputText) return questions;
 
     // Pipe ( | ) usado como separador de parágrafo em entradas de linha única
-    inputText = inputText.replace(/\s*\|\s*/g, '\n');
+    inputText = inputText.replace(/\s*\|\s*/g, '\n\n');
 
     const feedbackRegex = /^(?:feedback|coment[aá]rio):\s*/i;
     // Matches "Questão 01 - Alternativa Correta: E" (gabarito format)
