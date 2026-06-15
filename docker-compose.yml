@@ -3,6 +3,4 @@ services:
     build: .
     restart: unless-stopped
     ports:
-      # Na VPS fica em http://IP (porta 80). Para testar local sem conflito:
-      #   PORT=8080 docker compose up -d --build  ->  http://localhost:8080
-      - "${PORT:-80}:80"
+      - "3001:80"
