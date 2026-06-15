@@ -29,7 +29,7 @@ export function textToCards(questions: Question[]): IQuestionCard[] {
   return questions.map((q) => ({
     id: generateId(),
     questionText: q.questionText
-      .replace(/<\/p>/gi, '\n')
+      .replace(/<\/p>/gi, '\n\n')
       .replace(/<br\s*\/?>/gi, '\n')
       .replace(/<[^>]+>/g, '')
       .replace(/\n{3,}/g, '\n\n')
