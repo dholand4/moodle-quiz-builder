@@ -25,7 +25,10 @@ function unwrapBoldPrefix(line: string): { line: string; wasFullyBold: boolean }
 export function normalizeExtractedText(inputText: string): string {
     if (!inputText) return '';
 
-    const rawLines = inputText
+    // Pipe ( | ) usado como separador de parágrafo em entradas de linha única
+    const withLineBreaks = inputText.replace(/\s*\|\s*/g, '\n');
+
+    const rawLines = withLineBreaks
         .split(/\r?\n/)
         .map((line) => line.replace(/\s+/g, ' ').trim());
 
