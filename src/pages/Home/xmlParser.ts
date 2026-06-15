@@ -217,6 +217,9 @@ export function parseTextToQuestions(inputText: string): Question[] {
     const questions: Question[] = [];
     if (!inputText) return questions;
 
+    // Pipe ( | ) usado como separador de parágrafo em entradas de linha única
+    inputText = inputText.replace(/\s*\|\s*/g, '\n');
+
     const feedbackRegex = /^(?:feedback|coment[aá]rio):\s*/i;
     // Matches "Questão 01 - Alternativa Correta: E" (gabarito format)
     const gabaritoRegex = /^quest[ãa]o\s*0*(\d+)\s*[-–]\s*alternativa\s+correta\s*:\s*([a-eA-E])/i;
