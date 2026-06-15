@@ -27,6 +27,9 @@ export const quizLanguage = StreamLanguage.define({
       return 'string';
     }
 
+    // Inline: `code`
+    if (stream.match(/`[^`\n]+`/)) return 'meta';
+
     // Inline: *bold* or _italic_
     if (stream.match(/\*[^*]+\*/)) return 'emphasis';
     if (stream.match(/_[^_]+_/)) return 'emphasis';

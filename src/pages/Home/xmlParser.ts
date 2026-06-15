@@ -185,6 +185,7 @@ const escapeXML = (str: string): string =>
 const formatInlineLine = (raw: string): string => {
     const escaped = escapeXML(raw);
     return escaped
+        .replace(/`([^`\n]+)`/g, '<code>$1</code>')
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.*?)\*/g, '<strong>$1</strong>')
         .replace(/_(.*?)_/g, '<em>$1</em>');

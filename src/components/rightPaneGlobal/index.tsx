@@ -266,6 +266,7 @@ function ShortcutsTab() {
         <div><span style={{ color: 'var(--syn-option)' }}>c)</span> Brasília <span style={{ color: 'var(--syn-correct)' }}>{'{correto}'}</span></div>
         <div><span style={{ color: 'var(--syn-image)' }}>[imagem1]</span> inline</div>
         <div><span style={{ fontWeight: 700 }}>**negrito**</span> e <span style={{ fontStyle: 'italic' }}>_itálico_</span></div>
+        <div><code style={{ fontSize: 11, background: 'var(--orange-50)', border: '1px solid var(--orange-100)', borderRadius: 3, padding: '0 3px' }}>`código HTML`</code></div>
       </MonoBox>
 
       <SectionLabel style={{ marginTop: 6 }}>Atalhos de teclado</SectionLabel>

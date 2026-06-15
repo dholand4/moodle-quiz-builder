@@ -54,6 +54,17 @@ export const Wrapper = styled.div<{ $isDragOver?: boolean }>`
   /* Bold WYSIWYG */
   .cm-bold-text { font-weight: 700; }
 
+  /* Inline code WYSIWYG */
+  .cm-code-text {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12px;
+    background: var(--orange-50);
+    border: 1px solid var(--orange-100);
+    border-radius: 3px;
+    padding: 0 3px;
+    color: var(--orange-700, #c2410c);
+  }
+
   /* Alignment WYSIWYG */
   .cm-centered-line  { text-align: center; }
   .cm-justified-line { text-align: justify; }

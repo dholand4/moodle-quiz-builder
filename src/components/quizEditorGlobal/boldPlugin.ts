@@ -12,6 +12,7 @@ class EmptyWidget extends WidgetType {
 
 const HIDDEN = Decoration.replace({ widget: new EmptyWidget() });
 const BOLD   = Decoration.mark({ class: 'cm-bold-text' });
+const CODE   = Decoration.mark({ class: 'cm-code-text' });
 
 export function boldPlugin() {
   return ViewPlugin.fromClass(
@@ -35,23 +36,30 @@ export function boldPlugin() {
 function build(view: EditorView): DecorationSet {
   const builder = new RangeSetBuilder<Decoration>();
   const doc = view.state.doc.toString();
-  const matches: { from: number; textFrom: number; textTo: number; to: number }[] = [];
-  const regex = /\*\*([^*\n]+)\*\*/g;
+
+  type Span = { from: number; textFrom: number; textTo: number; to: number; kind: 'bold' | 'code' };
+  const spans: Span[] = [];
+
+  const boldRegex = /\*\*([^*\n]+)\*\*/g;
+  const codeRegex = /`([^`\n]+)`/g;
   let m: RegExpExecArray | null;
 
-  while ((m = regex.exec(doc)) !== null) {
-    matches.push({
-      from: m.index,
-      textFrom: m.index + 2,
-      textTo: m.index + m[0].length - 2,
-      to: m.index + m[0].length,
-    });
+  while ((m = boldRegex.exec(doc)) !== null) {
+    spans.push({ from: m.index, textFrom: m.index + 2, textTo: m.index + m[0].length - 2, to: m.index + m[0].length, kind: 'bold' });
+  }
+  while ((m = codeRegex.exec(doc)) !== null) {
+    spans.push({ from: m.index, textFrom: m.index + 1, textTo: m.index + m[0].length - 1, to: m.index + m[0].length, kind: 'code' });
   }
 
-  for (const { from, textFrom, textTo, to } of matches) {
+  spans.sort((a, b) => a.from - b.from);
+
+  let lastTo = -1;
+  for (const { from, textFrom, textTo, to, kind } of spans) {
+    if (from < lastTo) continue; // skip overlapping spans — first one wins
     builder.add(from, textFrom, HIDDEN);
-    builder.add(textFrom, textTo, BOLD);
+    builder.add(textFrom, textTo, kind === 'bold' ? BOLD : CODE);
     builder.add(textTo, to, HIDDEN);
+    lastTo = to;
   }
 
   return builder.finish();

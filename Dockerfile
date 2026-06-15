@@ -6,7 +6,7 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
-RUN npx tsc -b && npx vite build --base=/quiz/
+RUN npx tsc -b && npx vite build --base=/
 
 FROM nginx:1.27-alpine
 
